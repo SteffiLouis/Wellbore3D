@@ -33,33 +33,36 @@ function init() {
 
   var textFont;
   var loader = new THREE.FontLoader();
-  loader.load( 'https://rawgit.com/mrdoob/three.js/dev/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+  loader.load( 'https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function ( font ) {
   for(var i = 0; i <= divisions ; i++){   
     points.push((markPoints * i ).toString());
     
     var textGeo = new THREE.TextGeometry( (markPoints * i ).toString(), {
+      
       font: font,
       size: 1,
       height: 1,
-      // bevelSegments: 5,
+      bevelSegments: 20,
+      // bevelThickness: -1,
       color : "red"
     });
-    var textMaterial = new THREE.MeshPhongMaterial( { color: 0x0033ff } );
+ 
+    var textMaterial = new THREE.MeshPhongMaterial( {color :"black"} );
     var mesh = new THREE.Mesh( textGeo, textMaterial );
     mesh.position.set( 0, markPoints * i, 0);
-    
+    // mesh.lookAt(camera.position);
     scene.add( mesh );
 
-    var textMaterial = new THREE.MeshPhongMaterial( { color: 0x0033ff } );
+    var textMaterial = new THREE.MeshPhongMaterial( { color: "black" } );
     var mesh = new THREE.Mesh( textGeo, textMaterial );
     mesh.position.set( markPoints * i, 0, 0);
-    
+    // mesh.lookAt(camera.position);
     scene.add( mesh );
     
-    var textMaterial = new THREE.MeshPhongMaterial( { color: 0x0033ff } );
+    var textMaterial = new THREE.MeshPhongMaterial( { color: "black" } );
     var mesh = new THREE.Mesh( textGeo, textMaterial );
     mesh.position.set( 0, 0, markPoints * i);
-    
+    // mesh.lookAt(camera.position);
     scene.add( mesh );
   };
   });
@@ -87,7 +90,8 @@ function init() {
  scene.add(gridYZ);
 
 //text//
-
+var light = new THREE.AmbientLight( "white" ); // soft white light
+scene.add( light );
     var ah = new THREE.AxesHelper(50);
     ah.position.y -= 0.1;  // The axis helper should not intefere with the grid helper
     scene.add(ah);
@@ -98,8 +102,8 @@ function init() {
 
 
 function render() {
-
   requestAnimationFrame(render);
   renderer.render(scene, camera);
+
 }
 }
