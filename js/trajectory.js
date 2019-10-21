@@ -44,11 +44,34 @@ function init() {
   gridYZ.rotation.z = Math.PI / 2;
   gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
   scene.add(gridYZ);
+  const img = new Image();
+  img.crossOrigin = "";
+  img.src = 'https://raw.githubusercontent.com/takahirox/takahirox.github.io/master/three.js.mmdeditor/examples/textures/terrain/backgrounddetailed6.jpg';
+  var terrainLoader = new THREE.TerrainLoader();
+  terrainLoader.load(img.src, function (data) {
+    debugger
+    var geometry = new THREE.PlaneGeometry(50, 50, 50);
+    for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+      geometry.vertices[i].z = data[i] / 65535 * 5;
+    }
+    var material = new THREE.MeshPhongMaterial({
+      // map: THREE.ImageUtils.loadTexture(img.src),
+      Color:"red"
+    });
+    var plane = new THREE.Mesh(geometry, material);
+    plane.rotation.x = Math.PI / 2 + Math.PI;
+    plane.rotation.y = 0;
+    plane.rotation.z = Math.PI / Math.cos(270) * 0.492;
+    plane.position.set(25, 0, 25);
+    plane.receiveShadow = true;
+    scene.add(plane);
+    
+  });
+  var spotLight = new THREE.SpotLight("white");
+  spotLight.position.set(100, 100, 100);
+  scene.add(spotLight);
   //   // Floor
   //   var floorGeometry = new THREE.PlaneGeometry(50, 50, 50),
-  //   for (var i = 0, l = floorGeometry.vertices.length; i < l; i++) {
-  //     floorGeometry.vertices[i].z = data[i] / 65535 * 5;
-  // }
   //   var floorcolor = [
   //     new THREE.MeshBasicMaterial({
   //       color: "#E2B822",
@@ -155,14 +178,10 @@ function init() {
   camera.position.z = 100;
   render();
 };
-window.addEventListener('resize', function () {
-  var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
-  renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
-  camera.aspect = aspectRatio;
-  camera.updateProjectionMatrix;
-});
+
 
 function render() {
+
   requestAnimationFrame(render);
   renderer.render(scene, camera);
 }
