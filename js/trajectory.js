@@ -44,12 +44,13 @@ function init() {
   gridYZ.rotation.z = Math.PI / 2;
   gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
   scene.add(gridYZ);
+
+  //texture
   const img = new Image();
   img.crossOrigin = "";
   img.src = 'https://raw.githubusercontent.com/takahirox/takahirox.github.io/master/three.js.mmdeditor/examples/textures/terrain/backgrounddetailed6.jpg';
   var terrainLoader = new THREE.TerrainLoader();
   terrainLoader.load(img.src, function (data) {
-    debugger
     var geometry = new THREE.PlaneGeometry(50, 50, 50);
     for (var i = 0, l = geometry.vertices.length; i < l; i++) {
       geometry.vertices[i].z = data[i] / 65535 * 5;
@@ -67,109 +68,11 @@ function init() {
     scene.add(plane);
     
   });
+
+  //light
   var spotLight = new THREE.SpotLight("white");
   spotLight.position.set(100, 100, 100);
   scene.add(spotLight);
-  //   // Floor
-  //   var floorGeometry = new THREE.PlaneGeometry(50, 50, 50),
-  //   var floorcolor = [
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#E2B822",
-  //       transparent: true,
-  //       opacity: 0.3,
-  //       side: THREE.DoubleSide
-  //     }),
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#E2B822",
-  //       transparent: true,
-  //       opacity: 5,
-  //       side: THREE.DoubleSide
-  //     }),
-
-  //   ]
-  //   var floorMaterial = new THREE.MeshFaceMaterial(floorcolor);
-  //   var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-  //   floor.rotation.x = Math.PI / 2;
-  //   floor.rotation.y = 0;
-  //   floor.rotation.z = Math.PI / Math.cos(270) * 0.492;
-  //   floor.position.set(25, 0, 25);
-  //   floor.receiveShadow = true;
-  //   scene.add(floor);
-
-  //   //floor2
-  //   var floorcolor1 = [
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#356AE8",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#356AE8	",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-
-  //   ]
-  //   var floorMaterial1 = new THREE.MeshFaceMaterial(floorcolor1);
-  //   var floor1 = new THREE.Mesh(floorGeometry, floorMaterial1);
-  //   floor1.rotation.x = Math.PI / 2;
-  //   floor1.rotation.y = 0;
-  //   floor1.rotation.z = Math.PI / Math.cos(270) * 0.492;
-  //   floor1.position.set(25, height, 25);
-  //   floor1.receiveShadow = true;
-  //   scene.add(floor1);
-
-  //   //floor4
-  //   var floorcolor3 = [
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#6AA121",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#6AA121",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-  //   ]
-  //   var floorMaterial3 = new THREE.MeshFaceMaterial(floorcolor3);
-  //   var floor3 = new THREE.Mesh(floorGeometry, floorMaterial3);
-  //   floor3.rotation.x = Math.PI / 2;
-  //   floor3.rotation.y = 0;
-  //   floor3.rotation.z = Math.PI / Math.cos(270) * 0.492;
-  //   var y1 = height + 20;
-  //   floor3.position.set(25, y1, 25);
-  //   floor3.receiveShadow = true;
-  //   scene.add(floor3);
-
-  //   var floorcolor2 = [
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#C88141",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-  //     new THREE.MeshBasicMaterial({
-  //       color: "#C88141",
-  //       transparent: true,
-  //       opacity: 0.5,
-  //       side: THREE.DoubleSide
-  //     }),
-
-  //   ]
-  //   var floorMaterial2 = new THREE.MeshFaceMaterial(floorcolor2);
-  //   var floor2 = new THREE.Mesh(floorGeometry, floorMaterial2);
-  //   floor2.rotation.x = Math.PI / 2;
-  //   floor2.rotation.y = 0;
-  //   floor2.rotation.z = Math.PI / Math.cos(270) * 0.492;
-  //   var y = height + 10;
-  //   floor2.position.set(25, y, 25);
-  //   floor2.receiveShadow = true;
-  //   scene.add(floor2);
   var ah = new THREE.AxesHelper(50);
   ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
   scene.add(ah);
