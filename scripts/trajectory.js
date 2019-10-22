@@ -75,39 +75,32 @@ $(document).ready(function () {
     //texture
     const img = new Image();
     img.crossOrigin = "";
-    img.src = 'https://raw.githubusercontent.com/takahirox/takahirox.github.io/master/three.js.mmdeditor/examples/textures/terrain/backgrounddetailed6.jpg';
+    img.src = 'img/jotunheimen-texture.jpg';
     var terrainLoader = new THREE.TerrainLoader();
-    terrainLoader.load(img.src, function (data) {
-      var geometry = new THREE.PlaneGeometry(size,size,size);
+    terrainLoader.load('img/jotunheimen.bin', function (data) {
+      var geometry = new THREE.PlaneGeometry(150,150,150);
       for (var i = 0, l = geometry.vertices.length; i < l; i++) {
         geometry.vertices[i].z = data[i] / 65535 * 5;
       }
       var material = new THREE.MeshPhongMaterial({
-        map: THREE.ImageUtils.loadTexture(img.src),
+        map: THREE.TextureLoader(img.src),
       });
       var plane = new THREE.Mesh(geometry, material);
       plane.rotation.x = Math.PI / 2 + Math.PI;
       plane.rotation.y = 0;
       plane.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      plane.position.set(25, 0, 25);
+      plane.position.set(75, 0, 75);
       plane.receiveShadow = true;
       scene.add(plane);
 
     });
 
-    //light
-    var spotLight = new THREE.SpotLight("white");
-    spotLight.position.set(100, 100, 100);
-    scene.add(spotLight);
+
 
     //text//
     var ah = new THREE.AxesHelper(150);
     ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
     scene.add(ah);
-    camera.position.x = 20;
-    camera.position.y = 30;
-    camera.position.z = 70;
-
     //light
     var light = new THREE.PointLight(0xffffff, 0.5);
     light.position.set(50, 50, 50);
@@ -117,9 +110,9 @@ $(document).ready(function () {
     light.position.set(50, 50, -50);
     camera.add(light);
 
-    var spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(50, 50, 200);
-    scene.add(spotLight);
+    // var spotLight = new THREE.SpotLight(0xffffff);
+    // spotLight.position.set(50, 50, 200);
+    // scene.add(spotLight);
 
     var material = new THREE.MeshPhysicalMaterial({
       color: 0xd0d9d9,

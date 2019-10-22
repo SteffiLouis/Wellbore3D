@@ -36,7 +36,7 @@ app.get('/',function(req,res){
   //__dirname : It will resolve to your project folder.
 });
 app.use("/scripts", express.static('./scripts/'));
-app.use("/Images",express.static('./Images'));
+app.use("/img",express.static('./img'));
 app.use("/styles", express.static('./styles/'));
 app.listen(3000);
 console.log(__dirname)
