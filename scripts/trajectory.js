@@ -23,8 +23,7 @@ $(document).ready(function () {
     renderer.setClearColor(0xffffff, 1);
 
     var controls = new THREE.OrbitControls(camera);
-    scene.add(controls)
-
+    scene.add(controls);
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -33,7 +32,7 @@ $(document).ready(function () {
       for (var i = 0; i <= divisions; i++) {
         var textGeo = new THREE.TextGeometry((markPoints * i).toString(), {
           font: font,
-          size: 2,
+          size: 7,
           height: 0.1,
           curveSegments: 12,
           weight: "Regular",
@@ -55,23 +54,23 @@ $(document).ready(function () {
 
     // grid xz
     var gridXZ = new THREE.GridHelper(size, divisions);
-    gridXZ.position.set(75, 0, 75);
+    gridXZ.position.set(size / 2, 0, size / 2);
     scene.add(gridXZ);
 
     //grid xy
     var gridXY = new THREE.GridHelper(size, divisions);
     gridXY.rotation.x = Math.PI / 2;
-    gridXY.position.set(75, 75, 0);
+    gridXY.position.set(size / 2, size / 2, 0);
     gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
     scene.add(gridXY);
 
     //grid yz
     var gridYZ = new THREE.GridHelper(size, divisions);
-    gridYZ.position.set(0, 75, 75);
+    gridYZ.position.set(0, size / 2, size / 2);
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
-
+    
     //texture
     const img = new Image();
     img.crossOrigin = "";
@@ -94,13 +93,6 @@ $(document).ready(function () {
       scene.add(plane);
 
     });
-
-
-
-    //text//
-    var ah = new THREE.AxesHelper(150);
-    ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-    scene.add(ah);
     //light
     var light = new THREE.PointLight(0xffffff, 0.5);
     light.position.set(50, 50, 50);
@@ -110,9 +102,9 @@ $(document).ready(function () {
     light.position.set(50, 50, -50);
     camera.add(light);
 
-    // var spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.position.set(50, 50, 200);
-    // scene.add(spotLight);
+    var spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-50, 75, 200);
+    scene.add(spotLight);
 
     var material = new THREE.MeshPhysicalMaterial({
       color: 0xd0d9d9,
@@ -125,14 +117,15 @@ $(document).ready(function () {
     var radialSegments = 64;
     var closed = false;
     var trajectoryData = [
-      new THREE.Vector3(10, 5, 150),
-      new THREE.Vector3(40, 5, 140),
-      new THREE.Vector3(60, 5, 130),
-      new THREE.Vector3(85, 5, 120),
-      new THREE.Vector3(100, 5, 100),
+      new THREE.Vector3(10, 10, 150),
+      new THREE.Vector3(40, 10, 140),
+      new THREE.Vector3(60, 10, 130),
+      new THREE.Vector3(85, 10, 120),
+      new THREE.Vector3(100, 10, 100),
       new THREE.Vector3(88, 20, 50),
       new THREE.Vector3(72, 50, 50),
-      new THREE.Vector3(60, 100, 50)
+      new THREE.Vector3(60, 100, 50),
+      new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
@@ -151,9 +144,17 @@ $(document).ready(function () {
     }
     renderer.render(scene, camera);
   }
-
   window.addEventListener('resize', onWindowResize, true);
   render();
+  function render() {
+    requestAnimationFrame(render);
+    if (points) {
+      for (var index = 0; index < points.length; index++) {
+        points[index].lookAt(camera.position);
+      }
+    }
+    renderer.render(scene, camera);
+  }
 
   // Functions :
   function onWindowResize() {
@@ -182,3 +183,4 @@ $(document).ready(function () {
     return trajectoryArray;
   }
 });
+
