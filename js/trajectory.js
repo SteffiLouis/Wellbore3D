@@ -24,7 +24,7 @@ function init() {
   scene.add(controls)
 
   //axes
-  var axes = new THREE.AxisHelper(150);
+  var axes = new THREE.AxisHelper(size);
   scene.add(axes);
   
   var size = 150;
@@ -57,26 +57,26 @@ function init() {
   
   // grid xz
   var gridXZ = new THREE.GridHelper(size, divisions);
-  gridXZ.position.set(75, 0, 75);
+  gridXZ.position.set(size/2, 0, size/2);
   scene.add(gridXZ);
 
   //grid xy
   var gridXY = new THREE.GridHelper(size, divisions);
   gridXY.rotation.x = Math.PI / 2;
-  gridXY.position.set(75, 75, 0);
+  gridXY.position.set(size/2, size/2, 0);
   gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
   scene.add(gridXY);
 
   //grid yz
   var gridYZ = new THREE.GridHelper(size, divisions);
-  gridYZ.position.set(0, 75, 75);
+  gridYZ.position.set(0, size/2, size/2);
   gridYZ.rotation.z = Math.PI / 2;
   gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
   scene.add(gridYZ);
 
   //text//
 
-  var ah = new THREE.AxesHelper(150);
+  var ah = new THREE.AxesHelper(size);
   ah.position.y -= 0.1;  // The axis helper should not intefere with the grid helper
   scene.add(ah);
   camera.position.x = 20;
