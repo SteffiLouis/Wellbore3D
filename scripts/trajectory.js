@@ -95,12 +95,6 @@ $(document).ready(function () {
     });
 
     //light
-    var spotLight = new THREE.SpotLight("white");
-    spotLight.position.set(100, 100, 100);
-    scene.add(spotLight);
-
-    
-    //light
     var light = new THREE.PointLight(0xffffff, 0.5);
     light.position.set(50, 50, 50);
     camera.add(light);
