@@ -88,7 +88,7 @@ $(document).ready(function () {
       plane.rotation.x = Math.PI / 2 + Math.PI;
       plane.rotation.y = 0;
       plane.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      plane.position.set(25, 0, 25);
+      plane.position.set(75, 0, 75);
       plane.receiveShadow = true;
       scene.add(plane);
 
@@ -99,14 +99,7 @@ $(document).ready(function () {
     spotLight.position.set(100, 100, 100);
     scene.add(spotLight);
 
-    //text//
-    var ah = new THREE.AxesHelper(150);
-    ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-    scene.add(ah);
-    camera.position.x = 20;
-    camera.position.y = 30;
-    camera.position.z = 70;
-
+    
     //light
     var light = new THREE.PointLight(0xffffff, 0.5);
     light.position.set(50, 50, 50);
@@ -117,7 +110,7 @@ $(document).ready(function () {
     camera.add(light);
 
     var spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(50, 50, 200);
+    spotLight.position.set(-50, 75, 200);
     scene.add(spotLight);
 
     var material = new THREE.MeshPhysicalMaterial({
@@ -131,11 +124,11 @@ $(document).ready(function () {
     var radialSegments = 64;
     var closed = false;
     var trajectoryData = [
-      new THREE.Vector3(10, 5, 150),
-      new THREE.Vector3(40, 5, 140),
-      new THREE.Vector3(60, 5, 130),
-      new THREE.Vector3(85, 5, 120),
-      new THREE.Vector3(100, 5, 100),
+      new THREE.Vector3(10, 10, 150),
+      new THREE.Vector3(40, 10, 140),
+      new THREE.Vector3(60, 10, 130),
+      new THREE.Vector3(85, 10, 120),
+      new THREE.Vector3(100, 10, 100),
       new THREE.Vector3(88, 20, 50),
       new THREE.Vector3(72, 50, 50),
       new THREE.Vector3(60, 100, 50),
