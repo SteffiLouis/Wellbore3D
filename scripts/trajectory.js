@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
   var scene, camera, trajectorySurface;
   var geometry, material, mesh;
   var renderer;
@@ -25,7 +24,6 @@ $(document).ready(function () {
 
     var controls = new THREE.OrbitControls(camera);
     scene.add(controls);
-
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -52,7 +50,6 @@ $(document).ready(function () {
         points.push(label);
         scene.add(label);
       };
-      
     });
 
     // grid xz
@@ -73,6 +70,42 @@ $(document).ready(function () {
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
+    
+    //texture
+    const img = new Image();
+    img.crossOrigin = "";
+    img.src = 'https://raw.githubusercontent.com/takahirox/takahirox.github.io/master/three.js.mmdeditor/examples/textures/terrain/backgrounddetailed6.jpg';
+    var terrainLoader = new THREE.TerrainLoader();
+    terrainLoader.load(img.src, function (data) {
+      var geometry = new THREE.PlaneGeometry(size,size,size);
+      for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+        geometry.vertices[i].z = data[i] / 65535 * 5;
+      }
+      var material = new THREE.MeshPhongMaterial({
+        map: THREE.ImageUtils.loadTexture(img.src),
+      });
+      var plane = new THREE.Mesh(geometry, material);
+      plane.rotation.x = Math.PI / 2 + Math.PI;
+      plane.rotation.y = 0;
+      plane.rotation.z = Math.PI / Math.cos(270) * 0.492;
+      plane.position.set(25, 0, 25);
+      plane.receiveShadow = true;
+      scene.add(plane);
+
+    });
+
+    //light
+    var spotLight = new THREE.SpotLight("white");
+    spotLight.position.set(100, 100, 100);
+    scene.add(spotLight);
+
+    //text//
+    var ah = new THREE.AxesHelper(150);
+    ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
+    scene.add(ah);
+    camera.position.x = 20;
+    camera.position.y = 30;
+    camera.position.z = 70;
 
     //light
     var light = new THREE.PointLight(0xffffff, 0.5);
@@ -107,7 +140,6 @@ $(document).ready(function () {
       new THREE.Vector3(72, 50, 50),
       new THREE.Vector3(60, 100, 50),
       new THREE.Vector3(60, 150, 50)
-
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
@@ -126,9 +158,17 @@ $(document).ready(function () {
     }
     renderer.render(scene, camera);
   }
-
   window.addEventListener('resize', onWindowResize, true);
   render();
+  function render() {
+    requestAnimationFrame(render);
+    if (points) {
+      for (var index = 0; index < points.length; index++) {
+        points[index].lookAt(camera.position);
+      }
+    }
+    renderer.render(scene, camera);
+  }
 
   // Functions :
   function onWindowResize() {
@@ -156,5 +196,5 @@ $(document).ready(function () {
     }
     return trajectoryArray;
   }
-
 });
+
