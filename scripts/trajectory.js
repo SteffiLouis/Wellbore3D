@@ -1,10 +1,10 @@
 var scene, camera, trajectorySurface;
 var geometry, material, mesh;
 var renderer;
-
 init();
 
 function init() {
+
     trajectorySurface = document.getElementById("trajectory_3d");
     scene = new THREE.Scene();
 
