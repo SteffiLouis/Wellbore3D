@@ -1,6 +1,8 @@
 var scene, camera, trajectorySurface;
 var geometry, material, mesh;
 var renderer;
+var label;
+var points = [];
 
 init();
 
@@ -25,13 +27,11 @@ function init() {
   
   var size = 50;
   var divisions = 5;
-  var points = [];
   var markPoints = size / divisions;
 
   var loader = new THREE.FontLoader();
   loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
     for (var i = 0; i <= divisions; i++) {
-      points.push((markPoints * i).toString());
       var textGeo = new THREE.TextGeometry((markPoints * i).toString(), {
         font: font,
         size: 2,
@@ -45,9 +45,10 @@ function init() {
       });
 
       var textMaterial = new THREE.MeshPhongMaterial({ color: "black" });
-      var mesh = new THREE.Mesh(textGeo, textMaterial);
-      mesh.position.set(0, markPoints * i, 0);
-      scene.add(mesh);
+      label = new THREE.Mesh(textGeo, textMaterial);
+      label.position.set(0, markPoints * i, 0);
+      points.push(label);
+      scene.add(label);
     };
   });
 
@@ -84,6 +85,10 @@ function init() {
 
 function render() {
   requestAnimationFrame(render);
+  if(points) {
+    for(var index = 0; index < points.length; index++) {
+      points[index].lookAt(camera.position);
+    }
+  }
   renderer.render(scene, camera);
-
 }
