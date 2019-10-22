@@ -3,34 +3,28 @@ var geometry, material, mesh;
 var renderer;
 var label;
 var points = [];
-
 init();
 
 function init() {
   trajectorySurface = document.getElementById("trajectory_3d");
   scene = new THREE.Scene();
-  
-  var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
-  startPosition = new THREE.Vector3( 50, 50, 200 );
-  camera = new THREE.PerspectiveCamera( 95, aspectRatio, 1, 10000 );
-  camera.position.set( startPosition.x, startPosition.y, startPosition.z );
-  scene.add( camera );
-  
-   renderer = new THREE.WebGLRenderer({ canvas: trajectorySurface });
-   renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
-   renderer.setClearColor(0xffffff, 1);
-  
-  var controls = new THREE.OrbitControls(camera);
-  scene.add(controls)
 
-  //axes
-  var axes = new THREE.AxisHelper(size);
-  scene.add(axes);
-  
+  var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
+  startPosition = new THREE.Vector3(50, 50, 200);
+  camera = new THREE.PerspectiveCamera(95, aspectRatio, 1, 10000);
+  camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+  scene.add(camera);
+
+  renderer = new THREE.WebGLRenderer({ canvas: trajectorySurface });
+  renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
+  renderer.setClearColor(0xffffff, 1);
+
+  var controls = new THREE.OrbitControls(camera);
+  scene.add(controls);
+
   var size = 150;
   var divisions = 5;
   var markPoints = size / divisions;
-
   var loader = new THREE.FontLoader();
   loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
     for (var i = 0; i <= divisions; i++) {
@@ -38,11 +32,11 @@ function init() {
         font: font,
         size: 2,
         height: 0.1,
-        curveSegments : 12,
-        weight : "Regular",
-        bevelEnabled : false,
-        bevelThickness : 1,
-        bevelSize : 0.2,
+        curveSegments: 12,
+        weight: "Regular",
+        bevelEnabled: false,
+        bevelThickness: 1,
+        bevelSize: 0.2,
         bevelSegments: 10,
       });
 
@@ -54,7 +48,6 @@ function init() {
     };
   });
 
-  
   // grid xz
   var gridXZ = new THREE.GridHelper(size, divisions);
   gridXZ.position.set(size/2, 0, size/2);
@@ -75,15 +68,14 @@ function init() {
   scene.add(gridYZ);
 
   //text//
-
   var ah = new THREE.AxesHelper(size);
   ah.position.y -= 0.1;  // The axis helper should not intefere with the grid helper
   scene.add(ah);
   camera.position.x = 20;
   camera.position.y = 30;
   camera.position.z = 70;
-  
-    //light
+
+  //light
   var light = new THREE.PointLight(0xffffff, 0.5);
   light.position.set(50, 50, 50);
   camera.add(light);
@@ -97,10 +89,10 @@ function init() {
   scene.add(spotLight);
 
   var material = new THREE.MeshPhysicalMaterial({
-      color: 0xd0d9d9,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 1
+    color: 0xd0d9d9,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 1
   });
   var tubularSegments = 150;
   var radius = 3;
@@ -121,18 +113,16 @@ function init() {
   var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
   mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
-
-render();
+  render();
 }
-  
-  function render() {
+
+function render() {
   requestAnimationFrame(render);
-  if(points) {
-    for(var index = 0; index < points.length; index++) {
+  if (points) {
+    for (var index = 0; index < points.length; index++) {
       points[index].lookAt(camera.position);
     }
   }
-  
   renderer.render(scene, camera);
 }
 
@@ -149,17 +139,17 @@ function onWindowResize() {
 function formatTrajectoryData(trajectoryList) {
   var measuredDepth, radian, degree, RF, north, east, tvd;
   var trajectoryArray = [];
-  for(var index = 0; index < trajectoryList.length; index++) {
+  for (var index = 0; index < trajectoryList.length; index++) {
     var firstData = trajectoryList[index];
     var secondData = trajectoryList[index + 1];
-    if(secondData) {
+    if (secondData) {
       measuredDepth = secondData.depth - firstData.depth;
       radian = Math.acos(Math.cos(secondData.inclination - firstData.inclination) - Math.sin(firstData.inclination) * Math.sin(secondData.inclination) * (1 - Math.cos(secondData.azimuth - firstData.azimuth)));
-      degree = radian *180 / Math.PI;
-      RF = (2/radian) * Math.tan(degree/2);
-      north = (measuredDepth/2) * (Math.sin(firstData.inclination) * Math.cos(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
-      east = (measuredDepth/2) * (Math.sin(firstData.inclination) * Math.sin(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
-      tvd = (measuredDepth/2) * (Math.cos(firstData.inclination) + Math.cos(secondData.inclination)) * RF;
+      degree = radian * 180 / Math.PI;
+      RF = (2 / radian) * Math.tan(degree / 2);
+      north = (measuredDepth / 2) * (Math.sin(firstData.inclination) * Math.cos(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
+      east = (measuredDepth / 2) * (Math.sin(firstData.inclination) * Math.sin(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
+      tvd = (measuredDepth / 2) * (Math.cos(firstData.inclination) + Math.cos(secondData.inclination)) * RF;
       trajectoryArray.push(new THREE.Vector3(north, tvd, east));
     }
   }

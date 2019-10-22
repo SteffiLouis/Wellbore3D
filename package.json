@@ -1,0 +1,13 @@
+{
+  "name": "3d",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
+    "three": "^0.109.0"
+  }
+}
