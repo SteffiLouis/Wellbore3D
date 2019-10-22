@@ -23,8 +23,7 @@ $(document).ready(function () {
     renderer.setClearColor(0xffffff, 1);
 
     var controls = new THREE.OrbitControls(camera);
-    scene.add(controls)
-
+    scene.add(controls);
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -33,7 +32,7 @@ $(document).ready(function () {
       for (var i = 0; i <= divisions; i++) {
         var textGeo = new THREE.TextGeometry((markPoints * i).toString(), {
           font: font,
-          size: 2,
+          size: 7,
           height: 0.1,
           curveSegments: 12,
           weight: "Regular",
@@ -55,23 +54,23 @@ $(document).ready(function () {
 
     // grid xz
     var gridXZ = new THREE.GridHelper(size, divisions);
-    gridXZ.position.set(75, 0, 75);
+    gridXZ.position.set(size / 2, 0, size / 2);
     scene.add(gridXZ);
 
     //grid xy
     var gridXY = new THREE.GridHelper(size, divisions);
     gridXY.rotation.x = Math.PI / 2;
-    gridXY.position.set(75, 75, 0);
+    gridXY.position.set(size / 2, size / 2, 0);
     gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
     scene.add(gridXY);
 
     //grid yz
     var gridYZ = new THREE.GridHelper(size, divisions);
-    gridYZ.position.set(0, 75, 75);
+    gridYZ.position.set(0, size / 2, size / 2);
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
-
+    
     //texture
     const img = new Image();
     img.crossOrigin = "";
@@ -132,7 +131,8 @@ $(document).ready(function () {
       new THREE.Vector3(100, 5, 100),
       new THREE.Vector3(88, 20, 50),
       new THREE.Vector3(72, 50, 50),
-      new THREE.Vector3(60, 100, 50)
+      new THREE.Vector3(60, 100, 50),
+      new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
@@ -151,9 +151,17 @@ $(document).ready(function () {
     }
     renderer.render(scene, camera);
   }
-
   window.addEventListener('resize', onWindowResize, true);
   render();
+  function render() {
+    requestAnimationFrame(render);
+    if (points) {
+      for (var index = 0; index < points.length; index++) {
+        points[index].lookAt(camera.position);
+      }
+    }
+    renderer.render(scene, camera);
+  }
 
   // Functions :
   function onWindowResize() {
@@ -182,3 +190,4 @@ $(document).ready(function () {
     return trajectoryArray;
   }
 });
+
