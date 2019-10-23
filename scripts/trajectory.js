@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
   var scene, camera, trajectorySurface;
   var geometry, material, mesh;
@@ -22,8 +23,8 @@ $(document).ready(function () {
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
     renderer.setClearColor(0xffffff, 1);
 
-    var controls = new THREE.OrbitControls(camera);
-    scene.add(controls);
+    var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
+    controls;
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -70,19 +71,19 @@ $(document).ready(function () {
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
-    
-    //texture
+
+    // //texture
     const img = new Image();
-    img.crossOrigin = "";
     img.src = 'img/jotunheimen-texture.jpg';
+
     var terrainLoader = new THREE.TerrainLoader();
     terrainLoader.load('img/jotunheimen.bin', function (data) {
-      var geometry = new THREE.PlaneGeometry(150,150,150);
+      var geometry = new THREE.PlaneGeometry(150, 150, 150);
       for (var i = 0, l = geometry.vertices.length; i < l; i++) {
         geometry.vertices[i].z = data[i] / 65535 * 5;
       }
-      var material = new THREE.MeshPhongMaterial({
-        map: THREE.TextureLoader(img.src),
+      var material = new THREE.MeshStandardMaterial({
+        map: new THREE.TextureLoader().load(img.src)
       });
       var plane = new THREE.Mesh(geometry, material);
       plane.rotation.x = Math.PI / 2 + Math.PI;
@@ -93,6 +94,7 @@ $(document).ready(function () {
       scene.add(plane);
 
     });
+
     //light
     var light = new THREE.PointLight(0xffffff, 0.5);
     light.position.set(50, 50, 50);
@@ -163,8 +165,7 @@ $(document).ready(function () {
     scene.add(mesh);
     render();
   }
-  window.addEventListener('resize', onWindowResize, true);
-  render();
+  // Functions :
   function render() {
     requestAnimationFrame(render);
     if (points) {
@@ -174,14 +175,13 @@ $(document).ready(function () {
     }
     renderer.render(scene, camera);
   }
-
-  // Functions :
+  window.addEventListener('resize', onWindowResize, true);
+  render();
   function onWindowResize() {
-    camera.aspect = surface.offsetWidth / surface.offsetHeight;
+    camera.aspect = trajectorySurface.offsetWidth/trajectorySurface.offsetHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(surface.offsetWidth, surface.offsetHeight);
+    renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
   }
-
   function formatTrajectoryData(trajectoryList) {
     var measuredDepth, radian, degree, RF, north, east, tvd;
     var trajectoryArray = [];
@@ -202,4 +202,3 @@ $(document).ready(function () {
     return trajectoryArray;
   }
 });
-
