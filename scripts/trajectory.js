@@ -129,20 +129,39 @@ $(document).ready(function () {
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
+    var loader = new THREE.FontLoader();
+    loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {debugger
+       
+      for (var i = 0; i < curve.points.length; i++) {
+        var textGeo = new THREE.TextGeometry((curve.points[i].y).toString(), {
+          font: font,
+          size: 5,
+          height: 0.1,
+          curveSegments: 12,
+          weight: "Regular",
+          bevelEnabled: false,
+          bevelThickness: 1,
+          bevelSize: 0.2,
+          bevelSegments: 10,
+        });
+        var textMaterial = new THREE.MeshPhongMaterial({
+          color: "black"
+        }); 
+        label = new THREE.Mesh(textGeo, textMaterial);
+        label.position.set(curve.points[i].x,curve.points[i].y,curve.points[i].z);
+        points.push(label);
+        scene.add(label);
+      };
+      
+      
+
+    });
+
+
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     render();
-  }
-
-  function render() {
-    requestAnimationFrame(render);
-    if (points) {
-      for (var index = 0; index < points.length; index++) {
-        points[index].lookAt(camera.position);
-      }
-    }
-    renderer.render(scene, camera);
   }
   window.addEventListener('resize', onWindowResize, true);
   render();
