@@ -71,7 +71,6 @@ $(document).ready(function () {
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
 
-
     // //texture
     const img = new Image();
     img.src = 'img/jotunheimen-texture.jpg';
@@ -152,12 +151,11 @@ $(document).ready(function () {
           color: "black"
         });
 
-        var cordinate = perpendicularPoints(i)
+        var cordinate = perpendicularPoints(i,curve.points)
         var geometry = new THREE.Geometry();
         geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
         geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
         var line = new THREE.Line(geometry, textMaterial);
-
 
         label = new THREE.Mesh(textGeo, textMaterial);
         label.position.set(cordinate.x, cordinate.y, curve.points[i].z);
@@ -168,68 +166,66 @@ $(document).ready(function () {
       };
     });
 
-
-    function _drawPerpendicularToPoint(P1, P2, distance, position = 'left') {
-
-      var slope = (P2.y - P1.y) / (P2.x - P1.x);
-      if ((P2.y == P1.y) && (P2.x == P1.x)) {
-        slope = 1;
-      }
-
-      var sloprPerpendicular = -(1 / slope);
-
-      var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
-      var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
-
-      var pX, pY;
-
-      switch (position) {
-        case 'right':
-          pX = P1.x - (distance * dx);
-          pY = P1.y - (distance * dy);
-          break;
-        case 'left':
-        default:
-          pX = P1.x + (distance * dx);
-          pY = P1.y + (distance * dy);
-          break;
-      }
-      return {
-        'x': pX,
-        'y': pY
-
-      }
-    }
-
-    function perpendicularPoints(index) {
-      var distance = 10;
-      var P1 = {
-        'x': curve.points[index].x,
-        'y': curve.points[index].y
-      }
-      if (index == (curve.points.length - 1)) {
-
-        var P2 = {
-          'x': curve.points[index - 1].x,
-          'y': curve.points[index - 1].y
-        }
-
-      } else {
-        var P2 = {
-          'x': curve.points[index + 1].x,
-          'y': curve.points[index + 1].y
-        }
-      }
-
-      return _drawPerpendicularToPoint(P1, P2, distance)
-    }
-
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     render();
   }
+
   // Functions :
+  function _drawPerpendicularToPoint(P1, P2, distance, position = 'left') {
+    var slope = (P2.y - P1.y) / (P2.x - P1.x);
+    if ((P2.y == P1.y) && (P2.x == P1.x)) {
+      slope = 1;
+    }
+
+    var sloprPerpendicular = -(1 / slope);
+    var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+    var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+    var pX, pY;
+
+    switch (position) {
+      case 'right':
+        pX = P1.x - (distance * dx);
+        pY = P1.y - (distance * dy);
+        break;
+      case 'left':
+      default:
+        pX = P1.x + (distance * dx);
+        pY = P1.y + (distance * dy);
+        break;
+    }
+    return {
+      'x': pX,
+      'y': pY
+
+    }
+  }
+
+  function perpendicularPoints(index,curvePoints) {
+    var distance = 10;
+    var P1 = {
+      'x': curvePoints[index].x,
+      'y': curvePoints[index].y
+    }
+    if (index == (curvePoints.length - 1)) {
+
+      var P2 = {
+        'x': curvePoints[index - 1].x,
+        'y': curvePoints[index - 1].y
+      }
+
+    } else {
+      var P2 = {
+        'x': curvePoints[index + 1].x,
+        'y': curvePoints[index + 1].y
+      }
+    }
+
+    return _drawPerpendicularToPoint(P1, P2, distance)
+  }
+
+
   function render() {
     requestAnimationFrame(render);
     if (points) {
