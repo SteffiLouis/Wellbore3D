@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
   var scene, camera, trajectorySurface;
   var geometry, material, mesh;
@@ -72,6 +71,7 @@ $(document).ready(function () {
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
 
+
     // //texture
     const img = new Image();
     img.src = 'img/jotunheimen-texture.jpg';
@@ -132,12 +132,18 @@ $(document).ready(function () {
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
     var loader = new THREE.FontLoader();
-    loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {debugger
-       
+    loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
+      var uniqueKey = {};
+      curve.points = curve.points.filter(ele => {
+        if (!uniqueKey[ele.y]) {
+          uniqueKey[ele.y] = true;
+          return true
+        }
+      });
       for (var i = 0; i < curve.points.length; i++) {
         var textGeo = new THREE.TextGeometry((curve.points[i].y).toString(), {
           font: font,
-          size: 5,
+          size: 4,
           height: 0.1,
           curveSegments: 12,
           weight: "Regular",
@@ -148,17 +154,79 @@ $(document).ready(function () {
         });
         var textMaterial = new THREE.MeshPhongMaterial({
           color: "black"
-        }); 
+        });
+
+        var cordinate = perpendicularPoints(i)
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
+        geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
+        var line = new THREE.Line(geometry, textMaterial);
+
+
         label = new THREE.Mesh(textGeo, textMaterial);
-        label.position.set(curve.points[i].x,curve.points[i].y,curve.points[i].z);
+        label.position.set(cordinate.x, cordinate.y, curve.points[i].z);
         points.push(label);
         scene.add(label);
-      };
-      
-      
+        scene.add(line);
 
+      };
     });
 
+
+    function _drawPerpendicularToPoint(P1, P2, distance, position = 'left') {
+
+      var slope = (P2.y - P1.y) / (P2.x - P1.x);
+      if ((P2.y == P1.y) && (P2.x == P1.x)) {
+        slope = 1;
+      }
+
+      var sloprPerpendicular = -(1 / slope);
+
+      var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+      var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+
+      var pX, pY;
+
+      switch (position) {
+        case 'right':
+          pX = P1.x - (distance * dx);
+          pY = P1.y - (distance * dy);
+          break;
+        case 'left':
+        default:
+          pX = P1.x + (distance * dx);
+          pY = P1.y + (distance * dy);
+          break;
+      }
+      return {
+        'x': pX,
+        'y': pY
+
+      }
+    }
+
+    function perpendicularPoints(index) {
+      var distance = 10;
+      var P1 = {
+        'x': curve.points[index].x,
+        'y': curve.points[index].y
+      }
+      if (index == (curve.points.length - 1)) {
+
+        var P2 = {
+          'x': curve.points[index - 1].x,
+          'y': curve.points[index - 1].y
+        }
+
+      } else {
+        var P2 = {
+          'x': curve.points[index + 1].x,
+          'y': curve.points[index + 1].y
+        }
+      }
+
+      return _drawPerpendicularToPoint(P1, P2, distance)
+    }
 
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     mesh = new THREE.Mesh(geometry, material);
@@ -177,11 +245,13 @@ $(document).ready(function () {
   }
   window.addEventListener('resize', onWindowResize, true);
   render();
+
   function onWindowResize() {
-    camera.aspect = trajectorySurface.offsetWidth/trajectorySurface.offsetHeight;
+    camera.aspect = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
   }
+
   function formatTrajectoryData(trajectoryList) {
     var measuredDepth, radian, degree, RF, north, east, tvd;
     var trajectoryArray = [];
