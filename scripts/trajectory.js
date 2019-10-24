@@ -1,6 +1,5 @@
 $(document).ready(function () {
-  var scene, camera, trajectorySurface;
-  var geometry, material, mesh;
+  var scene, camera, trajectorySurface, renderer;
   var renderer;
   var label;
   var points = [];
@@ -10,20 +9,25 @@ $(document).ready(function () {
     trajectorySurface = document.getElementById("trajectory_3d");
     scene = new THREE.Scene();
 
+    //camera
     var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
     startPosition = new THREE.Vector3(50, 50, 200);
     camera = new THREE.PerspectiveCamera(95, aspectRatio, 1, 10000);
     camera.position.set(startPosition.x, startPosition.y, startPosition.z);
     scene.add(camera);
 
+    //renderer
     renderer = new THREE.WebGLRenderer({
       canvas: trajectorySurface
     });
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
     renderer.setClearColor(0xffffff, 1);
 
+    //rotation and zoom controls
     var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
     controls;
+
+    //label on y-axis
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -52,63 +56,54 @@ $(document).ready(function () {
       };
     });
 
-    // grid xz
+    // grid along xz-axis
     var gridXZ = new THREE.GridHelper(size, divisions);
     gridXZ.position.set(size / 2, 0, size / 2);
     scene.add(gridXZ);
 
-    //grid xy
+    //grid along xy-axis
     var gridXY = new THREE.GridHelper(size, divisions);
     gridXY.rotation.x = Math.PI / 2;
     gridXY.position.set(size / 2, size / 2, 0);
     gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
     scene.add(gridXY);
 
-    //grid yz
+    //grid along yz-axis
     var gridYZ = new THREE.GridHelper(size, divisions);
     gridYZ.position.set(0, size / 2, size / 2);
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
 
-    // //texture
-    const img = new Image();
-    img.src = 'img/jotunheimen-texture.jpg';
-
+    //texture
     var terrainLoader = new THREE.TerrainLoader();
     terrainLoader.load('img/jotunheimen.bin', function (data) {
-      var geometry = new THREE.PlaneGeometry(150, 150, 150);
-      for (var i = 0, l = geometry.vertices.length; i < l; i++) {
-        geometry.vertices[i].z = data[i] / 65535 * 5;
+      var planeGeometry = new THREE.PlaneGeometry(150, 150, 150);
+      for (var i = 0, l = planeGeometry.vertices.length; i < l; i++) {
+        planeGeometry.vertices[i].z = data[i] / 65535 * 5;
       }
-      var material = new THREE.MeshLambertMaterial({
-        map: new THREE.TextureLoader().load(img.src)
+      var terrainMaterial = new THREE.MeshLambertMaterial({
+        map: new THREE.TextureLoader().load('img/jotunheimen-texture.jpg')
       });
-      var plane = new THREE.Mesh(geometry, material);
-      plane.rotation.x = Math.PI / 2 + Math.PI;
-      plane.rotation.y = 0;
-      plane.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      plane.position.set(75, 0, 75);
-      plane.receiveShadow = true;
-      scene.add(plane);
-
+      var planeMesh = new THREE.Mesh(planeGeometry, terrainMaterial);
+      planeMesh.rotation.x = Math.PI / 2 + Math.PI;
+      planeMesh.rotation.y = 0;
+      planeMesh.rotation.z = Math.PI / Math.cos(270) * 0.492;
+      planeMesh.position.set(75, 0, 75);
+      planeMesh.receiveShadow = true;
+      scene.add(planeMesh);
     });
 
     // light
-    var light = new THREE.PointLight(0xffffff,1);
-    light.position.set(50, 50, 50);
-    camera.add(light);
+    var pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(50, 50, 50);
+    camera.add(pointLight);
 
-    var spotLight = new THREE.SpotLight(0xffffff,0.5);
+    var spotLight = new THREE.SpotLight(0xffffff, 0.5);
     spotLight.position.set(-50, 75, 200);
     scene.add(spotLight);
 
-    var material = new THREE.MeshPhysicalMaterial({
-      color: 0xd0d9d9,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 1
-    });
+    //draw trajectory tube
     var tubularSegments = 150;
     var radius = 3;
     var radialSegments = 64;
@@ -126,6 +121,7 @@ $(document).ready(function () {
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
 
+    // label on trajectory curve depth marking
     var loader = new THREE.FontLoader();
     loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
       var uniqueKey = {};
@@ -150,8 +146,7 @@ $(document).ready(function () {
         var textMaterial = new THREE.MeshPhongMaterial({
           color: "black"
         });
-
-        var cordinate = perpendicularPoints(i,curve.points)
+        var cordinate = perpendicularPoints(i, curve.points)
         var geometry = new THREE.Geometry();
         geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
         geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
@@ -162,70 +157,22 @@ $(document).ready(function () {
         points.push(label);
         scene.add(label);
         scene.add(line);
-
       };
     });
 
+    var material = new THREE.MeshPhysicalMaterial({
+      color: 0xd0d9d9,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 1
+    });
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    mesh = new THREE.Mesh(geometry, material);
+    var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     render();
   }
 
   // Functions :
-  function _drawPerpendicularToPoint(P1, P2, distance, position = 'left') {
-    var slope = (P2.y - P1.y) / (P2.x - P1.x);
-    if ((P2.y == P1.y) && (P2.x == P1.x)) {
-      slope = 1;
-    }
-
-    var sloprPerpendicular = -(1 / slope);
-    var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
-    var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
-    var pX, pY;
-
-    switch (position) {
-      case 'right':
-        pX = P1.x - (distance * dx);
-        pY = P1.y - (distance * dy);
-        break;
-      case 'left':
-      default:
-        pX = P1.x + (distance * dx);
-        pY = P1.y + (distance * dy);
-        break;
-    }
-    return {
-      'x': pX,
-      'y': pY
-
-    }
-  }
-
-  function perpendicularPoints(index,curvePoints) {
-    var distance = 10;
-    var P1 = {
-      'x': curvePoints[index].x,
-      'y': curvePoints[index].y
-    }
-    if (index == (curvePoints.length - 1)) {
-
-      var P2 = {
-        'x': curvePoints[index - 1].x,
-        'y': curvePoints[index - 1].y
-      }
-
-    } else {
-      var P2 = {
-        'x': curvePoints[index + 1].x,
-        'y': curvePoints[index + 1].y
-      }
-    }
-
-    return _drawPerpendicularToPoint(P1, P2, distance)
-  }
-
-
   function render() {
     requestAnimationFrame(render);
     if (points) {
@@ -244,23 +191,49 @@ $(document).ready(function () {
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
   }
 
-  function formatTrajectoryData(trajectoryList) {
-    var measuredDepth, radian, degree, RF, north, east, tvd;
-    var trajectoryArray = [];
-    for (var index = 0; index < trajectoryList.length; index++) {
-      var firstData = trajectoryList[index];
-      var secondData = trajectoryList[index + 1];
-      if (secondData) {
-        measuredDepth = secondData.depth - firstData.depth;
-        radian = Math.acos(Math.cos(secondData.inclination - firstData.inclination) - Math.sin(firstData.inclination) * Math.sin(secondData.inclination) * (1 - Math.cos(secondData.azimuth - firstData.azimuth)));
-        degree = radian * 180 / Math.PI;
-        RF = (2 / radian) * Math.tan(degree / 2);
-        north = (measuredDepth / 2) * (Math.sin(firstData.inclination) * Math.cos(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
-        east = (measuredDepth / 2) * (Math.sin(firstData.inclination) * Math.sin(firstData.azimuth) + Math.sin(secondData.inclination) * Math.cos(secondData.azimuth)) * RF;
-        tvd = (measuredDepth / 2) * (Math.cos(firstData.inclination) + Math.cos(secondData.inclination)) * RF;
-        trajectoryArray.push(new THREE.Vector3(north, tvd, east));
+  function _drawPerpendicularToPoint(P1, P2, distance, position = 'left') {
+    var slope = (P2.y - P1.y) / (P2.x - P1.x);
+    if ((P2.y == P1.y) && (P2.x == P1.x)) {
+      slope = 1;
+    }
+    var sloprPerpendicular = -(1 / slope);
+    var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+    var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+    var pX, pY;
+    switch (position) {
+      case 'right':
+        pX = P1.x - (distance * dx);
+        pY = P1.y - (distance * dy);
+        break;
+      case 'left':
+      default:
+        pX = P1.x + (distance * dx);
+        pY = P1.y + (distance * dy);
+        break;
+    }
+    return {
+      'x': pX,
+      'y': pY
+    }
+  }
+
+  function perpendicularPoints(index, curvePoints) {
+    var distance = 10;
+    var P1 = {
+      'x': curvePoints[index].x,
+      'y': curvePoints[index].y
+    }
+    if (index == (curvePoints.length - 1)) {
+      var P2 = {
+        'x': curvePoints[index - 1].x,
+        'y': curvePoints[index - 1].y
+      }
+    } else {
+      var P2 = {
+        'x': curvePoints[index + 1].x,
+        'y': curvePoints[index + 1].y
       }
     }
-    return trajectoryArray;
+    return _drawPerpendicularToPoint(P1, P2, distance)
   }
 });
