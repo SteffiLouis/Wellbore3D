@@ -82,7 +82,7 @@ $(document).ready(function () {
       for (var i = 0, l = geometry.vertices.length; i < l; i++) {
         geometry.vertices[i].z = data[i] / 65535 * 5;
       }
-      var material = new THREE.MeshStandardMaterial({
+      var material = new THREE.MeshLambertMaterial({
         map: new THREE.TextureLoader().load(img.src)
       });
       var plane = new THREE.Mesh(geometry, material);
@@ -95,16 +95,12 @@ $(document).ready(function () {
 
     });
 
-    //light
-    var light = new THREE.PointLight(0xffffff, 0.5);
+    // light
+    var light = new THREE.PointLight(0xffffff,1);
     light.position.set(50, 50, 50);
     camera.add(light);
 
-    var light = new THREE.DirectionalLight(0xffffff, 0.5);
-    light.position.set(50, 50, -50);
-    camera.add(light);
-
-    var spotLight = new THREE.SpotLight(0xffffff);
+    var spotLight = new THREE.SpotLight(0xffffff,0.5);
     spotLight.position.set(-50, 75, 200);
     scene.add(spotLight);
 
