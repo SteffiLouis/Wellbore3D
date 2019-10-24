@@ -130,34 +130,36 @@ $(document).ready(function () {
           uniqueKey[ele.y] = true;
           return true
         }
+        
       });
+      
+      var curvePositions =[];
       for (var i = 0; i < curve.points.length; i++) {
-        var textGeo = new THREE.TextGeometry((curve.points[i].y).toString(), {
-          font: font,
-          size: 4,
-          height: 0.1,
-          curveSegments: 12,
-          weight: "Regular",
-          bevelEnabled: false,
-          bevelThickness: 1,
-          bevelSize: 0.2,
-          bevelSegments: 10,
-        });
-        var textMaterial = new THREE.MeshPhongMaterial({
-          color: "black"
-        });
-        var cordinate = perpendicularPoints(i, curve.points)
+            var textMaterial = new THREE.MeshPhongMaterial({
+                color: "black"
+              });
+
+        var cordinate = perpendicularPoints(i, curve.points);
+        curvePositions.push({x:cordinate.x,y:cordinate.y,z:curve.points[i].z});
         var geometry = new THREE.Geometry();
         geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
         geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
         var line = new THREE.Line(geometry, textMaterial);
-
-        label = new THREE.Mesh(textGeo, textMaterial);
-        label.position.set(cordinate.x, cordinate.y, curve.points[i].z);
-        points.push(label);
-        scene.add(label);
         scene.add(line);
       };
+
+      var curveFields = {
+        size: 4,
+        height: 0.1,
+        curveSegments: 12,
+        weight: "Regular",
+        bevelEnabled: false,
+        bevelThickness: 1,
+        bevelSize: 0.2,
+        bevelSegments: 10,
+        color:"black"
+      }
+      labelText(font,curve.points,curvePositions,curveFields);
     });
 
     var material = new THREE.MeshPhysicalMaterial({
@@ -214,6 +216,31 @@ $(document).ready(function () {
     return {
       'x': pX,
       'y': pY
+    }
+  }
+
+  function labelText(font,pointsdata,curvePositions,curveFields){
+
+    for (var i = 0; i < pointsdata.length; i++) {
+      var textGeo = new THREE.TextGeometry((pointsdata[i].y).toString(),{
+        font: font,
+        size: curveFields.size ? curveFields.size :4,
+        height: curveFields.height ? curveFields.height:0.1,
+        curveSegments: curveFields.curveSegments ? curveFields.curveSegments:5,
+        weight: curveFields.weight ? curveFields.weight:"Regular",
+        bevelEnabled: curveFields.bevelEnabled ? curveFields.bevelEnabled:false,
+        bevelThickness: curveFields.bevelThickness ? curveFields.bevelThickness:1,
+        bevelSize: curveFields.bevelSize ? curveFields.bevelSize: 0.2,
+        bevelSegments: curveFields.bevelSegments ? curveFields.bevelSegments: 10,
+      });
+      var textMaterial = new THREE.MeshPhongMaterial({
+        color: curveFields.color ? curveFields.color : "black"
+      });
+
+      label = new THREE.Mesh(textGeo, textMaterial);
+      label.position.set(curvePositions[i].x, curvePositions[i].y, curvePositions[i].z);
+      points.push(label);
+      scene.add(label);
     }
   }
 
