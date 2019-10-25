@@ -27,29 +27,30 @@ $(document).ready(function () {
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
+    var axisPoints = [];
+    var labelPosition = [];
+    for (var i = 0; i <= divisions; i++) {
+      axisPoints.push(markPoints * i);
+      labelPosition.push({
+        x: 0,
+        y: markPoints * i,
+        z: 0
+      });
+    };
+    var curveFields = {
+      size: 7,
+      height: 0.1,
+      curveSegments: 12,
+      weight: "Regular",
+      bevelEnabled: false,
+      bevelThickness: 1,
+      bevelSize: 0.2,
+      bevelSegments: 10,
+      color: "black"
+    }
     var loader = new THREE.FontLoader();
     loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
-      for (var i = 0; i <= divisions; i++) {
-        var textGeo = new THREE.TextGeometry((markPoints * i).toString(), {
-          font: font,
-          size: 7,
-          height: 0.1,
-          curveSegments: 12,
-          weight: "Regular",
-          bevelEnabled: false,
-          bevelThickness: 1,
-          bevelSize: 0.2,
-          bevelSegments: 10,
-        });
-
-        var textMaterial = new THREE.MeshPhongMaterial({
-          color: "black"
-        });
-        label = new THREE.Mesh(textGeo, textMaterial);
-        label.position.set(0, markPoints * i, 0);
-        points.push(label);
-        scene.add(label);
-      };
+    labelText(font, axisPoints, labelPosition, curveFields);
     });
 
     var gridXZ = new THREE.GridHelper(size, divisions);
@@ -119,17 +120,23 @@ $(document).ready(function () {
           uniqueKey[ele.y] = true;
           return true
         }
-        
+
       });
-      
-      var curvePositions =[];
+
+      var curvePositions = [];
+      var curveLables = [];
       for (var i = 0; i < curve.points.length; i++) {
-            var textMaterial = new THREE.MeshPhongMaterial({
-                color: "black"
-              });
+        var textMaterial = new THREE.MeshPhongMaterial({
+          color: "black"
+        });
 
         var cordinate = perpendicularPoints(i, curve.points);
-        curvePositions.push({x:cordinate.x,y:cordinate.y,z:curve.points[i].z});
+        curvePositions.push({
+          x: cordinate.x,
+          y: cordinate.y,
+          z: curve.points[i].z
+        });
+        curveLables.push(curve.points[i].y)
         var geometry = new THREE.Geometry();
         geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
         geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
@@ -146,9 +153,9 @@ $(document).ready(function () {
         bevelThickness: 1,
         bevelSize: 0.2,
         bevelSegments: 10,
-        color:"black"
+        color: "black"
       }
-      labelText(font,curve.points,curvePositions,curveFields);
+      labelText(font, curveLables, curvePositions, curveFields);
     });
 
     var material = new THREE.MeshPhysicalMaterial({
@@ -161,7 +168,7 @@ $(document).ready(function () {
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    controls.target = new THREE.Vector3(size/3, size/3, size/3);
+    controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
     controls.update();
     render();
   }
@@ -210,19 +217,19 @@ $(document).ready(function () {
     }
   }
 
-  function labelText(font,pointsdata,curvePositions,curveFields){
+  function labelText(font, pointsdata, curvePositions, curveFields) {
 
     for (var i = 0; i < pointsdata.length; i++) {
-      var textGeo = new THREE.TextGeometry((pointsdata[i].y).toString(),{
+      var textGeo = new THREE.TextGeometry((pointsdata[i]).toString(), {
         font: font,
-        size: curveFields.size ? curveFields.size :4,
-        height: curveFields.height ? curveFields.height:0.1,
-        curveSegments: curveFields.curveSegments ? curveFields.curveSegments:5,
-        weight: curveFields.weight ? curveFields.weight:"Regular",
-        bevelEnabled: curveFields.bevelEnabled ? curveFields.bevelEnabled:false,
-        bevelThickness: curveFields.bevelThickness ? curveFields.bevelThickness:1,
-        bevelSize: curveFields.bevelSize ? curveFields.bevelSize: 0.2,
-        bevelSegments: curveFields.bevelSegments ? curveFields.bevelSegments: 10,
+        size: curveFields.size ? curveFields.size : 4,
+        height: curveFields.height ? curveFields.height : 0.1,
+        curveSegments: curveFields.curveSegments ? curveFields.curveSegments : 5,
+        weight: curveFields.weight ? curveFields.weight : "Regular",
+        bevelEnabled: curveFields.bevelEnabled ? curveFields.bevelEnabled : false,
+        bevelThickness: curveFields.bevelThickness ? curveFields.bevelThickness : 1,
+        bevelSize: curveFields.bevelSize ? curveFields.bevelSize : 0.2,
+        bevelSegments: curveFields.bevelSegments ? curveFields.bevelSegments : 10,
       });
       var textMaterial = new THREE.MeshPhongMaterial({
         color: curveFields.color ? curveFields.color : "black"
