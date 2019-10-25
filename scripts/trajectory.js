@@ -47,7 +47,7 @@ $(document).ready(function () {
       color: "black"
     }
     var loader = new THREE.FontLoader();
-    loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
+    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
       labelText(font, axisPoints, labelPosition, curveFields);
     });
 
@@ -60,14 +60,12 @@ $(document).ready(function () {
     var gridXY = new THREE.GridHelper(size, divisions);
     gridXY.rotation.x = Math.PI / 2;
     gridXY.position.set(size / 2, size / 2, 0);
-    gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
     scene.add(gridXY);
 
     //grid along yz-axis
     var gridYZ = new THREE.GridHelper(size, divisions);
     gridYZ.position.set(0, size / 2, size / 2);
     gridYZ.rotation.z = Math.PI / 2;
-    gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
 
     // terrain texture
@@ -82,10 +80,8 @@ $(document).ready(function () {
       });
       var planeMesh = new THREE.Mesh(planeGeometry, terrainMaterial);
       planeMesh.rotation.x = Math.PI / 2 + Math.PI;
-      planeMesh.rotation.y = 0;
       planeMesh.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      planeMesh.position.set(75, 0, 75);
-      planeMesh.receiveShadow = true;
+      planeMesh.position.set(size/2, 0, size/2);
       scene.add(planeMesh);
     });
 
@@ -115,8 +111,9 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
+    // label along trajectory curve.
     var loader = new THREE.FontLoader();
-    loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
+    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
       var uniqueKey = {};
       curve.points = curve.points.filter(ele => {
         if (!uniqueKey[ele.y]) {
@@ -124,20 +121,19 @@ $(document).ready(function () {
           return true
         }
       });
-
       var curvePositions = [];
       var curveLables = [];
       for (var i = 0; i < curve.points.length; i++) {
-        var textMaterial = new THREE.MeshPhongMaterial({
-          color: "black"
-        });
         var cordinate = perpendicularPoints(i, curve.points);
         curvePositions.push({
           x: cordinate.x,
           y: cordinate.y,
           z: curve.points[i].z
         });
-        curveLables.push(curve.points[i].y)
+        curveLables.push(curve.points[i].y);
+        var textMaterial = new THREE.MeshPhongMaterial({
+          color: "black"
+        });
         var geometry = new THREE.Geometry();
         geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
         geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
@@ -166,11 +162,14 @@ $(document).ready(function () {
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-    var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
+
+    //rotation and zoom controls
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
     controls.update();
     render();
   }
+
   function render() {
     requestAnimationFrame(render);
     //set label with respect to camera rotation
