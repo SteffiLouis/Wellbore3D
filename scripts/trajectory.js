@@ -1,7 +1,5 @@
 $(document).ready(function () {
   var scene, camera, trajectorySurface, renderer;
-  var renderer;
-  var label;
   var points = [];
   init();
 
@@ -9,21 +7,21 @@ $(document).ready(function () {
     trajectorySurface = document.getElementById("trajectory_3d");
     scene = new THREE.Scene();
 
+    //camera
     var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
-    startPosition = new THREE.Vector3(50, 50, 200);
+    var startPosition = new THREE.Vector3(50, 50, 200);
     camera = new THREE.PerspectiveCamera(95, aspectRatio, 1, 10000);
     camera.position.set(startPosition.x, startPosition.y, startPosition.z);
     scene.add(camera);
 
+    //renderer
     renderer = new THREE.WebGLRenderer({
       canvas: trajectorySurface
     });
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
     renderer.setClearColor(0xffffff, 1);
 
-    var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
-    controls;
-
+    //label on y-axis
     var size = 150;
     var divisions = 5;
     var markPoints = size / divisions;
@@ -50,25 +48,29 @@ $(document).ready(function () {
     }
     var loader = new THREE.FontLoader();
     loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
-    labelText(font, axisPoints, labelPosition, curveFields);
+      labelText(font, axisPoints, labelPosition, curveFields);
     });
 
+    // grid along xz-axis
     var gridXZ = new THREE.GridHelper(size, divisions);
     gridXZ.position.set(size / 2, 0, size / 2);
     scene.add(gridXZ);
 
+    //grid along xy-axis
     var gridXY = new THREE.GridHelper(size, divisions);
     gridXY.rotation.x = Math.PI / 2;
     gridXY.position.set(size / 2, size / 2, 0);
     gridXY.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
     scene.add(gridXY);
 
+    //grid along yz-axis
     var gridYZ = new THREE.GridHelper(size, divisions);
     gridYZ.position.set(0, size / 2, size / 2);
     gridYZ.rotation.z = Math.PI / 2;
     gridYZ.setColors(new THREE.Color(0xffffff), new THREE.Color(0x00ff00));
     scene.add(gridYZ);
 
+    // terrain texture
     var terrainLoader = new THREE.TerrainLoader();
     terrainLoader.load('img/jotunheimen.bin', function (data) {
       var planeGeometry = new THREE.PlaneGeometry(150, 150, 150);
@@ -87,6 +89,7 @@ $(document).ready(function () {
       scene.add(planeMesh);
     });
 
+    //Light
     var pointLight = new THREE.PointLight(0xffffff, 1);
     pointLight.position.set(50, 50, 50);
     camera.add(pointLight);
@@ -95,6 +98,7 @@ $(document).ready(function () {
     spotLight.position.set(-50, 75, 200);
     scene.add(spotLight);
 
+    //draw trajectory tube
     var tubularSegments = 150;
     var radius = 3;
     var radialSegments = 64;
@@ -111,7 +115,6 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
-
     var loader = new THREE.FontLoader();
     loader.load('https://rawgit.com/mrdoob/three.js/dev/examples/fonts/droid/droid_sans_regular.typeface.json', function (font) {
       var uniqueKey = {};
@@ -120,7 +123,6 @@ $(document).ready(function () {
           uniqueKey[ele.y] = true;
           return true
         }
-
       });
 
       var curvePositions = [];
@@ -129,7 +131,6 @@ $(document).ready(function () {
         var textMaterial = new THREE.MeshPhongMaterial({
           color: "black"
         });
-
         var cordinate = perpendicularPoints(i, curve.points);
         curvePositions.push({
           x: cordinate.x,
@@ -143,7 +144,6 @@ $(document).ready(function () {
         var line = new THREE.Line(geometry, textMaterial);
         scene.add(line);
       };
-
       var curveFields = {
         size: 4,
         height: 0.1,
@@ -157,7 +157,6 @@ $(document).ready(function () {
       }
       labelText(font, curveLables, curvePositions, curveFields);
     });
-
     var material = new THREE.MeshPhysicalMaterial({
       color: 0xd0d9d9,
       side: THREE.DoubleSide,
@@ -168,6 +167,8 @@ $(document).ready(function () {
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
+    //rotation and zoom controls
+    var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
     controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
     controls.update();
     render();
@@ -175,6 +176,7 @@ $(document).ready(function () {
 
   function render() {
     requestAnimationFrame(render);
+    //set label with respect to camera rotation
     if (points) {
       for (var index = 0; index < points.length; index++) {
         points[index].lookAt(camera.position);
@@ -196,9 +198,9 @@ $(document).ready(function () {
     if ((P2.y == P1.y) && (P2.x == P1.x)) {
       slope = 1;
     }
-    var sloprPerpendicular = -(1 / slope);
-    var dx = 1 / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
-    var dy = sloprPerpendicular / (Math.sqrt(Math.pow(sloprPerpendicular, 2) + 1));
+    var slopePerpendicular = -(1 / slope);
+    var dx = 1 / (Math.sqrt(Math.pow(slopePerpendicular, 2) + 1));
+    var dy = slopePerpendicular / (Math.sqrt(Math.pow(slopePerpendicular, 2) + 1));
     var pX, pY;
     switch (position) {
       case 'right':
@@ -218,7 +220,6 @@ $(document).ready(function () {
   }
 
   function labelText(font, pointsdata, curvePositions, curveFields) {
-
     for (var i = 0; i < pointsdata.length; i++) {
       var textGeo = new THREE.TextGeometry((pointsdata[i]).toString(), {
         font: font,
@@ -234,8 +235,7 @@ $(document).ready(function () {
       var textMaterial = new THREE.MeshPhongMaterial({
         color: curveFields.color ? curveFields.color : "black"
       });
-
-      label = new THREE.Mesh(textGeo, textMaterial);
+      var label = new THREE.Mesh(textGeo, textMaterial);
       label.position.set(curvePositions[i].x, curvePositions[i].y, curvePositions[i].z);
       points.push(label);
       scene.add(label);
