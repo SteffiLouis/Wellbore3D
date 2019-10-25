@@ -166,14 +166,11 @@ $(document).ready(function () {
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-
-    //rotation and zoom controls
     var controls = new THREE.OrbitControls(camera, renderer.trajectorySurface);
     controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
     controls.update();
     render();
   }
-
   function render() {
     requestAnimationFrame(render);
     //set label with respect to camera rotation
@@ -186,7 +183,6 @@ $(document).ready(function () {
   }
   window.addEventListener('resize', onWindowResize, true);
   render();
-
   function onWindowResize() {
     camera.aspect = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
     camera.updateProjectionMatrix();
