@@ -81,7 +81,7 @@ $(document).ready(function () {
       var planeMesh = new THREE.Mesh(planeGeometry, terrainMaterial);
       planeMesh.rotation.x = Math.PI / 2 + Math.PI;
       planeMesh.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      planeMesh.position.set(size/2, 0, size/2);
+      planeMesh.position.set(size / 2, 0, size / 2);
       scene.add(planeMesh);
     });
 
@@ -159,15 +159,19 @@ $(document).ready(function () {
       transparent: true,
       opacity: 1
     });
-    var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    var mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
+    var well = new THREE.Mesh(geometry, material);
+    scene.add(well);
 
     //rotation and zoom controls
     var controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
     controls.update();
     render();
+    var interaction = new THREE.Interaction(renderer, scene, camera);
+    well.on('click', function (ev) {
+      alert('click')
+    });
   }
 
   function render() {
