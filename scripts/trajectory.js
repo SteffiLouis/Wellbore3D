@@ -1,6 +1,8 @@
 $(document).ready(function () {
   var scene, camera, trajectorySurface, renderer;
   var points = [];
+  var point;
+  var totalDepth = 0;
   init();
 
   function init() {
@@ -112,6 +114,14 @@ $(document).ready(function () {
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
     var curveCoordinates = curve.getPoints(0.5);
+        var points = curve.getPoints(150);
+    point = curve.getPoints(150);
+    var geometry = new THREE.BufferGeometry().setFromPoints(points);
+    for (var i = 0; i < points.length; i++) {
+      if (i + 1 < points.length) {
+        totalDepth = totalDepth + Math.sqrt((points[i + 1].x - points[i].x) * (points[i + 1].x - points[i].x) + (points[i + 1].y - points[i].y) * (points[i + 1].y - points[i].y) + (points[i + 1].z - points[i].z) * (points[i + 1].z - points[i].z));
+      }
+    };
     // label along trajectory curve.
     var loader = new THREE.FontLoader();
     loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
@@ -269,4 +279,42 @@ $(document).ready(function () {
     }
     return _drawPerpendicularToPoint(P1, P2, distance)
   }
+
+  var curveDepth;
+  $("#clickButton").click(function () {
+    curveDepth = $("#data").val();
+    if (curveDepth > totalDepth) {
+      return;
+    }
+    var value = 0;
+    var previousPoint;
+    for (var i = 0; i < point.length; i++) {
+      if (i + 1 < point.length) {
+        value = value + Math.sqrt((point[i + 1].x - point[i].x) *
+          (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
+          (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
+          (point[i + 1].z - point[i].z));
+        if (value >= curveDepth) {
+          console.log(previousPoint);
+          previousPoint = point[i];
+          var material = new THREE.LineBasicMaterial({
+            color: "red"
+          });
+          var geometry = new THREE.Geometry();
+          geometry.vertices.push(
+            new THREE.Vector3(previousPoint.x, previousPoint.y, previousPoint.z),
+            new THREE.Vector3(0, 0, 0),
+          );
+          var line = new THREE.Line(geometry, material);
+          var mesh = new THREE.Mesh(geometry, material);
+          scene.add(line);
+          scene.add(mesh);
+          break;
+        } else {
+          previousPoint = point[i];
+        }
+      }
+    };
+  });
+
 });

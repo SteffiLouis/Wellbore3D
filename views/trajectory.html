@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Trajectory curve</title>
-        <link rel="stylesheet" type="text/css" href="styles/trajectory.css"/>
-        <script type="text/javascript" src="scripts/jquery.min.js"></script>
-        <script type="text/javascript" src="scripts/three.js"></script>
-        <script src="scripts/three.interaction.js"></script>
-        <script type="text/javascript" src="scripts/orbitControls.js"></script>
-        <script type="text/javascript" src="scripts/trajectory.js"></script>
-        <script type="text/javascript" src="scripts/threeTerrain.js"></script>
-    </head>
-    <body> 
-        <canvas id="trajectory_3d"></canvas>
-    </body>
+
+<head>
+    <title>Trajectory curve</title>
+    <link rel="stylesheet" type="text/css" href="styles/trajectory.css" />
+    <script type="text/javascript" src="scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="scripts/three.js"></script>
+    <script src="scripts/three.interaction.js"></script>
+    <script type="text/javascript" src="scripts/orbitControls.js"></script>
+    <script type="text/javascript" src="scripts/trajectory.js"></script>
+    <script type="text/javascript" src="scripts/threeTerrain.js"></script>
+</head>
+<body> 
+    <div class="textbox">
+        <input type="text" class="textfield" id ="data">
+        <button class="findbutton" id="clickButton">Find</button>
+    </div>
+    <canvas id="trajectory_3d"></canvas>
+</body>
+
 </html>

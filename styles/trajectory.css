@@ -7,3 +7,20 @@
     height: 100% !important; 
     display: block;
 }
+.textbox{
+    position: fixed;
+    right: 40px;
+    top: 40px;
+    z-index: 1;
+}
+.textfield{
+    border-radius: 5px;
+    border: 1px solid grey;
+    padding: 5px;
+}
+.findbutton{
+    padding: 5px;
+    width: 70px;
+    border-radius: 5px;
+    border: 1px solid grey;
+}
