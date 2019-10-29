@@ -114,7 +114,7 @@ $(document).ready(function () {
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
     var curveCoordinates = curve.getPoints(0.5);
-    var points = curve.getPoints(150);
+        var points = curve.getPoints(150);
     point = curve.getPoints(150);
     var geometry = new THREE.BufferGeometry().setFromPoints(points);
     for (var i = 0; i < points.length; i++) {
