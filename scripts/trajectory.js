@@ -111,7 +111,7 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
-    var points = curve.getPoints(0.5);
+    var curveCoordinates = curve.getPoints(0.5);
     // label along trajectory curve.
     var loader = new THREE.FontLoader();
     loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
@@ -166,7 +166,7 @@ $(document).ready(function () {
 
     //rotation and zoom controls
     var controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target = new THREE.Vector3(points[0].x, points[0].y, points[0].z);
+    controls.target = new THREE.Vector3(curveCoordinates[0].x, curveCoordinates[0].y, curveCoordinates[0].z);
     controls.update();
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
