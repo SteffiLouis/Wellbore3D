@@ -113,7 +113,7 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
-    //depth points//
+    var curveCoordinates = curve.getPoints(0.5);
     var points = curve.getPoints(150);
     point = curve.getPoints(150);
     var geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -176,12 +176,19 @@ $(document).ready(function () {
 
     //rotation and zoom controls
     var controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target = new THREE.Vector3(size / 3, size / 3, size / 3);
+    controls.target = new THREE.Vector3(curveCoordinates[0].x, curveCoordinates[0].y, curveCoordinates[0].z);
     controls.update();
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
+    var element;
     well.on('click', function (ev) {
-      alert('click')
+      element = ev.intersects[0].point
+      if (element) {
+        controls.target = new THREE.Vector3(element.x, element.y, element.z)
+      }
+      element.x;
+      element.y;
+      element.z;
     });
   }
 
