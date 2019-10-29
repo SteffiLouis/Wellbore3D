@@ -159,6 +159,7 @@ $(document).ready(function () {
       transparent: true,
       opacity: 1
     });
+
     var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
@@ -169,7 +170,6 @@ $(document).ready(function () {
     controls.update();
     render();
   }
-
   function render() {
     requestAnimationFrame(render);
     //set label with respect to camera rotation
@@ -256,4 +256,11 @@ $(document).ready(function () {
     }
     return _drawPerpendicularToPoint(P1, P2, distance)
   }
+
+  var curveDepth =[];
+  $( "#clickButton" ).click(function() {
+    curveDepth.push($("#data").val());
+  });
+
+
 });
