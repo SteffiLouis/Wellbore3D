@@ -171,9 +171,6 @@ $(document).ready(function () {
       opacity: 1
     });
     var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    var geometry = new THREE.TubeBufferGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    var mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
     var well = new THREE.Mesh(geometry, material);
     scene.add(well);
 
@@ -277,7 +274,7 @@ $(document).ready(function () {
   }
 
   var curveDepth;
-  $("#clickButton").click(function depthValue () {
+  $("#clickButton").click(function () {
     curveDepth = $("#data").val();
     if (curveDepth > totalDepth) {
       return;
