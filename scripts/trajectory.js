@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  var scene, camera, trajectorySurface, renderer;
+  var scene, camera, trajectorySurface, renderer, controls;
   var points = [];
   var point;
   var totalDepth = 0;
@@ -113,8 +113,8 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     var curve = new THREE.CatmullRomCurve3(trajectoryData);
-    var curveCoordinates = curve.getPoints(0.5);
-        var points = curve.getPoints(150);
+    var curveCoordinates = curve.getPointAt(0.5);
+    var points = curve.getPoints(150);
     point = curve.getPoints(150);
     var geometry = new THREE.BufferGeometry().setFromPoints(points);
     for (var i = 0; i < points.length; i++) {
@@ -175,8 +175,21 @@ $(document).ready(function () {
     scene.add(well);
 
     //rotation and zoom controls
-    var controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target = new THREE.Vector3(curveCoordinates[0].x, curveCoordinates[0].y, curveCoordinates[0].z);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    debugger
+    controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
+    //-------------------- TODO: to delete
+    var material = new THREE.LineBasicMaterial({
+      color: "red"
+    });
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(
+      new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z),
+      new THREE.Vector3(0, 0, 0),
+    );
+    var line = new THREE.Line(geometry, material);
+    scene.add(line);
+    //----------------------------
     controls.update();
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
@@ -186,9 +199,18 @@ $(document).ready(function () {
       if (element) {
         controls.target = new THREE.Vector3(element.x, element.y, element.z)
       }
-      element.x;
-      element.y;
-      element.z;
+      //--------------------TODO: To delete
+      var material = new THREE.LineBasicMaterial({
+        color: "red"
+      });
+      var geometry = new THREE.Geometry();
+      geometry.vertices.push(
+        new THREE.Vector3(element.x, element.y, element.z),
+        new THREE.Vector3(0, 0, 0),
+      );
+      var line = new THREE.Line(geometry, material);
+      scene.add(line);
+      //----------------------------
     });
   }
 
@@ -295,8 +317,8 @@ $(document).ready(function () {
           (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
           (point[i + 1].z - point[i].z));
         if (value >= curveDepth) {
-          console.log(previousPoint);
           previousPoint = point[i];
+          //------TODO: To delete
           var material = new THREE.LineBasicMaterial({
             color: "red"
           });
@@ -306,15 +328,13 @@ $(document).ready(function () {
             new THREE.Vector3(0, 0, 0),
           );
           var line = new THREE.Line(geometry, material);
-          var mesh = new THREE.Mesh(geometry, material);
           scene.add(line);
-          scene.add(mesh);
+          //--------------------
           break;
-        } else {
-          previousPoint = point[i];
         }
       }
     };
+    controls.target = new THREE.Vector3(previousPoint.x, previousPoint.y, previousPoint.z)
   });
 
 });
