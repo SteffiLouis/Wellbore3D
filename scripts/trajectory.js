@@ -219,7 +219,7 @@ $(document).ready(function () {
     pt = curve.getPoint(wellTangent);
     marker.position.set(pt.x, pt.y, pt.z);
     // get the tangent to the curve
-    tangent = curve.getTangent(t).normalize();
+    tangent = curve.getTangent(wellTangent).normalize();
     // calculate the axis to rotate around
     axis.crossVectors(up, tangent).normalize();
     // calcluate the angle between the up vector and the tangent
