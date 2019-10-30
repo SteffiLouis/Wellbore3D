@@ -176,7 +176,6 @@ $(document).ready(function () {
 
     //rotation and zoom controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    debugger
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
     //-------------------- TODO: to delete
     var material = new THREE.LineBasicMaterial({
@@ -198,6 +197,7 @@ $(document).ready(function () {
       element = ev.intersects[0].point
       if (element) {
         controls.target = new THREE.Vector3(element.x, element.y, element.z)
+        camera.lookAt(controls.target)
       }
       //--------------------TODO: To delete
       var material = new THREE.LineBasicMaterial({
