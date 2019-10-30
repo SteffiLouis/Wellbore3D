@@ -173,44 +173,22 @@ $(document).ready(function () {
     var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
     var well = new THREE.Mesh(geometry, material);
     scene.add(well);
-
+    _axisHelper(curveCoordinates);
     //rotation and zoom controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
-    //-------------------- TODO: to delete
-    var material = new THREE.LineBasicMaterial({
-      color: "red"
-    });
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z),
-      new THREE.Vector3(0, 0, 0),
-    );
-    var line = new THREE.Line(geometry, material);
-    scene.add(line);
-    //----------------------------
     controls.update();
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
-    var element;
     well.on('click', function (ev) {
-      element = ev.intersects[0].point
+      var element = ev.intersects[0].point
       if (element) {
-        controls.target = new THREE.Vector3(element.x, element.y, element.z)
+        _axisHelper(element);
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target = new THREE.Vector3(element.x, element.y, element.z);
+        controls.update();
         camera.lookAt(controls.target)
       }
-      //--------------------TODO: To delete
-      var material = new THREE.LineBasicMaterial({
-        color: "red"
-      });
-      var geometry = new THREE.Geometry();
-      geometry.vertices.push(
-        new THREE.Vector3(element.x, element.y, element.z),
-        new THREE.Vector3(0, 0, 0),
-      );
-      var line = new THREE.Line(geometry, material);
-      scene.add(line);
-      //----------------------------
     });
   }
 
@@ -302,9 +280,24 @@ $(document).ready(function () {
     return _drawPerpendicularToPoint(P1, P2, distance)
   }
 
-  var curveDepth;
+  function _axisHelper(coordinates) {
+    var selectedObject = scene.getObjectByName('axisHelper');
+    scene.remove(selectedObject);
+    var axisHelper = new THREE.AxesHelper(20);
+    var colors = axisHelper.geometry.attributes.color;
+    colors.setXYZ(0, 1, 0, 0); // index, R, G, B
+    colors.setXYZ(1, 1, 0, 0); // red
+    colors.setXYZ(2, 1, 0, 0);
+    colors.setXYZ(3, 1, 0, 0); // green
+    colors.setXYZ(4, 1, 0, 0);
+    colors.setXYZ(5, 1, 0, 0); // blue
+    axisHelper.name = 'axisHelper';
+    axisHelper.position.set(coordinates.x, coordinates.y, coordinates.z);
+    scene.add(axisHelper)
+  }
+
   $("#clickButton").click(function () {
-    curveDepth = $("#data").val();
+    var curveDepth = $("#data").val();
     if (curveDepth > totalDepth) {
       return;
     }
@@ -318,18 +311,7 @@ $(document).ready(function () {
           (point[i + 1].z - point[i].z));
         if (value >= curveDepth) {
           previousPoint = point[i];
-          //------TODO: To delete
-          var material = new THREE.LineBasicMaterial({
-            color: "red"
-          });
-          var geometry = new THREE.Geometry();
-          geometry.vertices.push(
-            new THREE.Vector3(previousPoint.x, previousPoint.y, previousPoint.z),
-            new THREE.Vector3(0, 0, 0),
-          );
-          var line = new THREE.Line(geometry, material);
-          scene.add(line);
-          //--------------------
+          _axisHelper(previousPoint);
           break;
         }
       }
