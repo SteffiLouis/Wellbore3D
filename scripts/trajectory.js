@@ -119,12 +119,11 @@ $(document).ready(function () {
     ];
     curve = new THREE.CatmullRomCurve3(trajectoryData);
     var curveCoordinates = curve.getPointAt(0.5);
-    var points = curve.getPoints(150);
     point = curve.getPoints(150);
-    var geometry = new THREE.BufferGeometry().setFromPoints(points);
-    for (var i = 0; i < points.length; i++) {
-      if (i + 1 < points.length) {
-        totalDepth = totalDepth + Math.sqrt((points[i + 1].x - points[i].x) * (points[i + 1].x - points[i].x) + (points[i + 1].y - points[i].y) * (points[i + 1].y - points[i].y) + (points[i + 1].z - points[i].z) * (points[i + 1].z - points[i].z));
+    var geometry = new THREE.BufferGeometry().setFromPoints(point);
+    for (var i = 0; i < point.length; i++) {
+      if (i + 1 < point.length) {
+        totalDepth = totalDepth + Math.sqrt((point[i + 1].x - point[i].x) * (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) * (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) * (point[i + 1].z - point[i].z));
       }
     };
     // label along trajectory curve.
