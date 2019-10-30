@@ -1,5 +1,10 @@
 $(document).ready(function () {
-  var scene, camera, trajectorySurface, renderer, controls;
+  var scene, camera, trajectorySurface, renderer, controls, curve;
+  var up = new THREE.Vector3(0, 1, 0);
+  var axis = new THREE.Vector3();
+  var pt, radians, axis, tangent, marker;
+  var wellTangent = 1;
+
   var points = [];
   var point;
   var totalDepth = 0;
@@ -112,7 +117,7 @@ $(document).ready(function () {
       new THREE.Vector3(60, 100, 50),
       new THREE.Vector3(60, 150, 50)
     ];
-    var curve = new THREE.CatmullRomCurve3(trajectoryData);
+    curve = new THREE.CatmullRomCurve3(trajectoryData);
     var curveCoordinates = curve.getPointAt(0.5);
     var points = curve.getPoints(150);
     point = curve.getPoints(150);
@@ -123,10 +128,11 @@ $(document).ready(function () {
       }
     };
     // label along trajectory curve.
+    var curvePoints = Object.assign([], curve.points);
     var loader = new THREE.FontLoader();
     loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
       var uniqueKey = {};
-      curve.points = curve.points.filter(ele => {
+      curvePoints = curvePoints.filter(ele => {
         if (!uniqueKey[ele.y]) {
           uniqueKey[ele.y] = true;
           return true
@@ -134,20 +140,20 @@ $(document).ready(function () {
       });
       var curvePositions = [];
       var curveLables = [];
-      for (var i = 0; i < curve.points.length; i++) {
-        var cordinate = perpendicularPoints(i, curve.points);
+      for (var i = 0; i < curvePoints.length; i++) {
+        var cordinate = perpendicularPoints(i, curvePoints);
         curvePositions.push({
           x: cordinate.x,
           y: cordinate.y,
-          z: curve.points[i].z
+          z: curvePoints[i].z
         });
-        curveLables.push(curve.points[i].y);
+        curveLables.push(curvePoints[i].y);
         var textMaterial = new THREE.MeshPhongMaterial({
           color: "black"
         });
         var geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(curve.points[i].x, curve.points[i].y, curve.points[i].z));
-        geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curve.points[i].z));
+        geometry.vertices.push(new THREE.Vector3(curvePoints[i].x, curvePoints[i].y, curvePoints[i].z));
+        geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curvePoints[i].z));
         var line = new THREE.Line(geometry, textMaterial);
         scene.add(line);
       };
@@ -168,12 +174,14 @@ $(document).ready(function () {
       color: 0xd0d9d9,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 1
+      opacity: 0.4
     });
     var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
     var well = new THREE.Mesh(geometry, material);
     scene.add(well);
     _axisHelper(curveCoordinates);
+    marker = getCube();
+    scene.add(marker);
     //rotation and zoom controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
@@ -200,8 +208,27 @@ $(document).ready(function () {
         points[index].lookAt(camera.position);
       }
     }
+    _wellAnimate();
     renderer.render(scene, camera);
   }
+
+  function _wellAnimate() {
+    if (wellTangent <= 0) {
+      return;
+    }
+    pt = curve.getPoint(wellTangent);
+    marker.position.set(pt.x, pt.y, pt.z);
+    // get the tangent to the curve
+    tangent = curve.getTangent(t).normalize();
+    // calculate the axis to rotate around
+    axis.crossVectors(up, tangent).normalize();
+    // calcluate the angle between the up vector and the tangent
+    radians = Math.acos(up.dot(tangent));
+    // set the quaternion
+    marker.quaternion.setFromAxisAngle(axis, radians);
+    wellTangent = (wellTangent <= 0) ? 1 : wellTangent -= 0.002;
+  }
+
   window.addEventListener('resize', onWindowResize, true);
   render();
 
@@ -235,6 +262,21 @@ $(document).ready(function () {
       'x': pX,
       'y': pY
     }
+  }
+
+  function getCube() {
+    // cube mats and cube
+    var mats = [];
+    for (var i = 0; i < 6; i++) {
+      mats.push(new THREE.MeshBasicMaterial({
+        color: Math.random() * 0xffffff
+      }));
+    }
+    var cube = new THREE.Mesh(
+      new THREE.CubeGeometry(4, 4, 4),
+      new THREE.MeshFaceMaterial(mats)
+    );
+    return cube;
   }
 
   function labelText(font, pointsdata, curvePositions, curveFields) {
