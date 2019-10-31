@@ -191,10 +191,6 @@ $(document).ready(function () {
       var element = ev.intersects[0].point
       if (element) {
         _axisHelper(element);
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.target = new THREE.Vector3(element.x, element.y, element.z);
-        controls.update();
-        camera.lookAt(controls.target)
       }
     });
   }
@@ -334,7 +330,8 @@ $(document).ready(function () {
     colors.setXYZ(5, 1, 0, 0); // blue
     axisHelper.name = 'axisHelper';
     axisHelper.position.set(coordinates.x, coordinates.y, coordinates.z);
-    scene.add(axisHelper)
+    scene.add(axisHelper);
+    camera.lookAt(new THREE.Vector3(coordinates.x, coordinates.y, coordinates.z));
   }
 
   $("#clickButton").click(function () {
@@ -357,7 +354,6 @@ $(document).ready(function () {
         }
       }
     };
-    controls.target = new THREE.Vector3(previousPoint.x, previousPoint.y, previousPoint.z)
   });
 
 });
