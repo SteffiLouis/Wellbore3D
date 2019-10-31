@@ -13,7 +13,7 @@ $(document).ready(function () {
   function init() {
     trajectorySurface = document.getElementById("trajectory_3d");
     scene = new THREE.Scene();
-
+    // scene.background = new THREE.Color(0x9c9c9c);
     //camera
     var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
     var startPosition = new THREE.Vector3(50, 50, 200);
@@ -332,6 +332,9 @@ $(document).ready(function () {
     axisHelper.position.set(coordinates.x, coordinates.y, coordinates.z);
     scene.add(axisHelper);
     camera.lookAt(new THREE.Vector3(coordinates.x, coordinates.y, coordinates.z));
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target = new THREE.Vector3(coordinates.x, coordinates.y, coordinates.z);
+    controls.update();
   }
 
   $("#clickButton").click(function () {
@@ -354,6 +357,11 @@ $(document).ready(function () {
         }
       }
     };
+  });
+
+  $('#btnBitAnimate').click(function(){
+    wellTangent = 1;
+    _wellAnimate();
   });
 
 });
