@@ -6,6 +6,7 @@
     width: calc(100% - 30px);
     height: calc(100vh - 168px);
     margin: 15px;
+    background-color: dimgrey;
 }
 .toolBox{
     max-width: 100%;
@@ -20,9 +21,10 @@
     border: 1px solid grey;
     padding: 5px;
 }
-.findbutton{
-    padding: 5px;
-    width: 70px;
+.button{
+    padding: 5px 15px;
+    cursor: pointer;
+    width: auto;
     border-radius: 5px;
     border: 1px solid grey;
 }
