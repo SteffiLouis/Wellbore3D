@@ -8,6 +8,9 @@ $(document).ready(function () {
   var points = [];
   var point;
   var totalDepth = 0;
+  var depthValue =[];
+  var depthLabels =[];
+  var depthcoordinates = [];
   init();
 
   function init() {
@@ -75,6 +78,12 @@ $(document).ready(function () {
     gridYZ.rotation.z = Math.PI / 2;
     scene.add(gridYZ);
 
+    //grid along yz-axis
+    var gridZY = new THREE.GridHelper(size, divisions);
+    gridZY.position.set(size , size / 2, size / 2);
+    gridZY.rotation.z = Math.PI / 2;
+    scene.add(gridZY);
+
     // terrain texture
     var terrainLoader = new THREE.TerrainLoader();
     terrainLoader.load('img/jotunheimen.bin', function (data) {
@@ -124,52 +133,35 @@ $(document).ready(function () {
     var geometry = new THREE.BufferGeometry().setFromPoints(points);
     for (var i = 0; i < points.length; i++) {
       if (i + 1 < points.length) {
-        totalDepth = totalDepth + Math.sqrt((points[i + 1].x - points[i].x) * (points[i + 1].x - points[i].x) + (points[i + 1].y - points[i].y) * (points[i + 1].y - points[i].y) + (points[i + 1].z - points[i].z) * (points[i + 1].z - points[i].z));
+        totalDepth = totalDepth + Math.sqrt((points[i + 1].x - points[i].x) * 
+        (points[i + 1].x - points[i].x) + (points[i + 1].y - points[i].y) * 
+        (points[i + 1].y - points[i].y) + (points[i + 1].z - points[i].z) * 
+        (points[i + 1].z - points[i].z));
+        depthcoordinates.push(totalDepth);
       }
     };
+    console.log(depthcoordinates)
+    depth();
     // label along trajectory curve.
     var curvePoints = Object.assign([], curve.points);
     var loader = new THREE.FontLoader();
     loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
-      var uniqueKey = {};
-      curvePoints = curvePoints.filter(ele => {
-        if (!uniqueKey[ele.y]) {
-          uniqueKey[ele.y] = true;
-          return true
-        }
-      });
-      var curvePositions = [];
-      var curveLables = [];
-      for (var i = 0; i < curvePoints.length; i++) {
-        var cordinate = perpendicularPoints(i, curvePoints);
-        curvePositions.push({
-          x: cordinate.x,
-          y: cordinate.y,
-          z: curvePoints[i].z
-        });
-        curveLables.push(curvePoints[i].y);
-        var textMaterial = new THREE.MeshPhongMaterial({
-          color: "black"
-        });
-        var geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(curvePoints[i].x, curvePoints[i].y, curvePoints[i].z));
-        geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curvePoints[i].z));
-        var line = new THREE.Line(geometry, textMaterial);
-        scene.add(line);
-      };
-      var curveFields = {
-        size: 4,
-        height: 0.1,
-        curveSegments: 12,
-        weight: "Regular",
-        bevelEnabled: false,
-        bevelThickness: 1,
-        bevelSize: 0.2,
-        bevelSegments: 10,
-        color: "black"
-      }
-      labelText(font, curveLables, curvePositions, curveFields);
+  
+    var curveFields = {
+      size: 4,
+      height: 0.1,
+      curveSegments: 12,
+      weight: "Regular",
+      bevelEnabled: false,
+      bevelThickness: 1,
+      bevelSize: 0.2,
+      bevelSegments: 10,
+      color: "black"
+    }
+    labelText(font, depthLabels, depthValue, curveFields);
+
     });
+
     var material = new THREE.MeshPhysicalMaterial({
       color: 0xd0d9d9,
       side: THREE.DoubleSide,
@@ -186,7 +178,9 @@ $(document).ready(function () {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
     controls.update();
+    // depth();
     render();
+
     var interaction = new THREE.Interaction(renderer, scene, camera);
     well.on('click', function (ev) {
       var element = ev.intersects[0].point
@@ -198,8 +192,9 @@ $(document).ready(function () {
         camera.lookAt(controls.target)
       }
     });
-  }
 
+  }
+  
   function render() {
     requestAnimationFrame(render);
     //set label with respect to camera rotation
@@ -338,27 +333,43 @@ $(document).ready(function () {
     scene.add(axisHelper)
   }
 
-  $("#clickButton").click(function () {
-    var curveDepth = $("#data").val();
+  function depth(depth = 0,isClicked){ 
+    curveDepth = depth;
     if (curveDepth > totalDepth) {
       return;
     }
     var value = 0;
     var previousPoint;
-    for (var i = 0; i < point.length; i++) {
-      if (i + 1 < point.length) {
-        value = value + Math.sqrt((point[i + 1].x - point[i].x) *
-          (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
-          (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
-          (point[i + 1].z - point[i].z));
-        if (value >= curveDepth) {
-          previousPoint = point[i];
-          _axisHelper(previousPoint);
-          break;
+
+      for (var i = 0; i < point.length; i++) {
+        if (i + 1 < point.length) {
+          value = value + Math.sqrt((point[i + 1].x - point[i].x) *
+            (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
+            (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
+            (point[i + 1].z - point[i].z));
+          if (value >= curveDepth) {
+            depthLabels.push(curveDepth);
+            curveDepth = curveDepth + 40
+            console.log(curveDepth)
+            point[i].y = Math.round(point[i].y)
+            previousPoint = point[i];
+            depthValue.push( point[i]);
+            _axisHelper(previousPoint);
+            if(isClicked){
+              break;
+              }
+           
+          }
         }
-      }
-    };
-    controls.target = new THREE.Vector3(previousPoint.x, previousPoint.y, previousPoint.z)
-  });
+      };
+  }
+ 
+    $("#clickButton").click(function () {
+      var curveDepth = Number($("#data").val());
+     if (curveDepth > totalDepth) {
+       return;
+     }
+     depth(curveDepth,true);
+   });
 
 });
