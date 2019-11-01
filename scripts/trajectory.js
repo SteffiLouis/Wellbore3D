@@ -8,6 +8,8 @@ $(document).ready(function () {
 
   var labels = []; //label array
   var point, totalDepth = 0; //for goto depth
+  var depthValue =[];
+  var depthLabels =[];
   init();
 
   function init() {
@@ -75,6 +77,11 @@ $(document).ready(function () {
     gridYZ.rotation.z = Math.PI / 2;
     scene.add(gridYZ);
 
+    var gridZY = new THREE.GridHelper(size, divisions);
+    gridZY.position.set(size , size / 2, size / 2);
+    gridZY.rotation.z = Math.PI / 2;
+    scene.add(gridZY);
+
     // terrain texture
     var terrainLoader = new THREE.TerrainLoader();
     terrainLoader.load('img/jotunheimen.bin', function (data) {
@@ -126,48 +133,24 @@ $(document).ready(function () {
         totalDepth = totalDepth + Math.sqrt((point[i + 1].x - point[i].x) * (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) * (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) * (point[i + 1].z - point[i].z));
       }
     };
+    
     // label along trajectory curve.
     var curvePoints = Object.assign([], curve.points);
     var loader = new THREE.FontLoader();
-    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
-      var uniqueKey = {};
-      curvePoints = curvePoints.filter(ele => {
-        if (!uniqueKey[ele.y]) {
-          uniqueKey[ele.y] = true;
-          return true
-        }
-      });
-      var curvePositions = [];
-      var curveLables = [];
-      for (var i = 0; i < curvePoints.length; i++) {
-        var cordinate = _perpendicularPoints(i, curvePoints);
-        curvePositions.push({
-          x: cordinate.x,
-          y: cordinate.y,
-          z: curvePoints[i].z
-        });
-        curveLables.push(curvePoints[i].y);
-        var textMaterial = new THREE.MeshPhongMaterial({
+      loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
+
+        var curveFields = {
+          size: 4,
+          height: 0.1,
+          curveSegments: 12,
+          weight: "Regular",
+          bevelEnabled: false,
+          bevelThickness: 1,
+          bevelSize: 0.2,
+          bevelSegments: 10,
           color: "black"
-        });
-        var geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(curvePoints[i].x, curvePoints[i].y, curvePoints[i].z));
-        geometry.vertices.push(new THREE.Vector3(cordinate.x, cordinate.y, curvePoints[i].z));
-        var line = new THREE.Line(geometry, textMaterial);
-        scene.add(line);
-      };
-      var curveFields = {
-        size: 4,
-        height: 0.1,
-        curveSegments: 12,
-        weight: "Regular",
-        bevelEnabled: false,
-        bevelThickness: 1,
-        bevelSize: 0.2,
-        bevelSegments: 10,
-        color: "black"
-      }
-      _addLabel(font, curveLables, curvePositions, curveFields);
+        }
+        _addLabel(font, depthLabels, depthValue, curveFields);
     });
     var material = new THREE.MeshPhysicalMaterial({
       color: 0xd0d9d9,
@@ -184,6 +167,7 @@ $(document).ready(function () {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
     controls.update();
+    depth();
     _axisHelper(curveCoordinates);
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
@@ -359,27 +343,45 @@ $(document).ready(function () {
     }
   });
 
-  $("#clickButton").click(function () {
-    var curveDepth = $("#data").val();
+  function depth(depth = 0,isClicked){ 
+    curveDepth = depth;
     if (curveDepth > totalDepth) {
       return;
     }
     var value = 0;
     var previousPoint;
-    for (var i = 0; i < point.length; i++) {
-      if (i + 1 < point.length) {
-        value = value + Math.sqrt((point[i + 1].x - point[i].x) *
-          (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
-          (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
-          (point[i + 1].z - point[i].z));
-        if (value >= curveDepth) {
-          previousPoint = point[i];
-          _axisHelper(previousPoint);
-          break;
+
+      for (var i = 0; i < point.length; i++) {
+        if (i + 1 < point.length) {
+          value = value + Math.sqrt((point[i + 1].x - point[i].x) *
+            (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
+            (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
+            (point[i + 1].z - point[i].z));
+          if (value >= curveDepth) {
+            depthLabels.push(curveDepth);
+            curveDepth = curveDepth + 40
+            console.log(curveDepth)
+            point[i].y = Math.round(point[i].y)
+            previousPoint = point[i];
+            depthValue.push( point[i]);
+           
+            if(isClicked){
+              _axisHelper(previousPoint);
+              break;
+              }
+           
+          }
         }
-      }
-    };
-  });
+      };
+  }
+
+  $("#clickButton").click(function () {
+    var curveDepth = Number($("#data").val());
+   if (curveDepth > totalDepth) {
+     return;
+   }
+   depth(curveDepth,true);
+ });
 
   $('#btnBitAnimate').click(function(){
     wellTangent = 1;
