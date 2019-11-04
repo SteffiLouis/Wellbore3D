@@ -167,7 +167,7 @@ $(document).ready(function () {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
     controls.update();
-    depth();
+    _depthMarker();
     _axisHelper(curveCoordinates);
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
@@ -343,7 +343,7 @@ $(document).ready(function () {
     }
   });
 
-  function depth(depth = 0,isClicked){ 
+  function _depthMarker(depth = 0,isClicked){ 
     curveDepth = depth;
     if (curveDepth > totalDepth) {
       return;
@@ -380,7 +380,7 @@ $(document).ready(function () {
    if (curveDepth > totalDepth) {
      return;
    }
-   depth(curveDepth,true);
+   _depthMarker(curveDepth,true);
  });
 
   $('#btnBitAnimate').click(function(){
