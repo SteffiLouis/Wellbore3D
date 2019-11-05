@@ -290,6 +290,7 @@ $(document).ready(function () {
   }
 
   function _axisHelper(coordinates) {
+    
     var selectedObject = scene.getObjectByName('axisHelper');
     scene.remove(selectedObject);
     var axisHelper = new THREE.AxesHelper(20);
@@ -362,7 +363,6 @@ $(document).ready(function () {
           if (value >= curveDepth) {
             depthLabels.push(curveDepth);
             curveDepth = curveDepth + 40
-            console.log(curveDepth)
             point[i].y = Math.round(point[i].y)
             previousPoint = point[i];
             depthValue.push( point[i]);
@@ -394,4 +394,13 @@ $(document).ready(function () {
     wellTangent = 1;
     _wellAnimate();
   });
+
+  trajectorySurface.addEventListener("mousedown", function(e){
+    if(e.button === 2){
+      trajectorySurface.onmousemove = function(e) {          
+        var selectedObject = scene.getObjectByName('axisHelper');
+        scene.remove(selectedObject);
+        }
+    }
+});
 });
