@@ -166,6 +166,7 @@ $(document).ready(function () {
     //rotation and zoom controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
+    controls.screenSpacePanning = true;
     controls.update();
     _depthMarker();
     _axisHelper(curveCoordinates);
