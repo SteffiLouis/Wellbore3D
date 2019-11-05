@@ -191,6 +191,7 @@ $(document).ready(function () {
     }
     pt = curve.getPoint(wellTangent);
     marker.position.set(pt.x, pt.y, pt.z);
+    _animateCameraAlongBit(pt); 
     // get the tangent to the curve
     tangent = curve.getTangent(wellTangent).normalize();
     // calculate the axis to rotate around
@@ -375,6 +376,11 @@ $(document).ready(function () {
       };
   }
 
+  function _animateCameraAlongBit(pt) {
+    camera.position.set(pt.x, pt.y, pt.z + 20);
+    camera.lookAt(pt.x, pt.y, pt.z + 20);
+  }
+  
   $("#clickButton").click(function () {
     var curveDepth = Number($("#data").val());
    if (curveDepth > totalDepth) {
