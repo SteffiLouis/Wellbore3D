@@ -1,10 +1,11 @@
 $(document).ready(function () {
-  var scene, camera, trajectorySurface, renderer, controls, curve, well;
+  var scene, camera, trajectorySurface, renderer, controls, curve, well, startPosition, curveCoordinates;
   var animateTimeSpan, previousCoordinates, nextCoordinates, startQuaternion, endQuaternion; //for camera animation 
   var up = new THREE.Vector3(0, 1, 0);
   var axis = new THREE.Vector3();
   var pt, radians, axis, tangent, marker;
   var wellTangent = 1;
+  var isWellAnimated = true;
 
   var labels = []; //label array
   var point, totalDepth = 0; //for goto depth
@@ -18,7 +19,7 @@ $(document).ready(function () {
     // scene.background = new THREE.Color(0x9c9c9c);
     //camera
     var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
-    var startPosition = new THREE.Vector3(50, 50, 200);
+    startPosition = new THREE.Vector3(50, 50, 200);
     camera = new THREE.PerspectiveCamera(95, aspectRatio, 1, 10000);
     camera.position.set(startPosition.x, startPosition.y, startPosition.z);
     scene.add(camera);
@@ -125,7 +126,7 @@ $(document).ready(function () {
       new THREE.Vector3(60, 150, 50)
     ];
     curve = new THREE.CatmullRomCurve3(trajectoryData);
-    var curveCoordinates = curve.getPointAt(0.5);
+    curveCoordinates = curve.getPointAt(0.5);
     point = curve.getPoints(150);
     var geometry = new THREE.BufferGeometry().setFromPoints(point);
     for (var i = 0; i < point.length; i++) {
@@ -188,6 +189,12 @@ $(document).ready(function () {
 
   function _wellAnimate() {
     if (wellTangent <= 0) {
+      if(isWellAnimated) {
+        isWellAnimated = false;
+        camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+        previousCoordinates = pt;
+        _cameraSetAnimate(curveCoordinates);
+      }
       return;
     }
     pt = curve.getPoint(wellTangent);
@@ -391,6 +398,7 @@ $(document).ready(function () {
  });
 
   $('#btnBitAnimate').click(function(){
+    isWellAnimated = true;
     wellTangent = 1;
     _wellAnimate();
   });
