@@ -3,20 +3,40 @@ $(document).ready(function () {
   var animateTimeSpan, previousCoordinates, nextCoordinates, startQuaternion, endQuaternion; //for camera animation 
   var up = new THREE.Vector3(0, 1, 0);
   var axis = new THREE.Vector3();
+  var loader;
   var pt, radians, axis, tangent, marker;
   var wellTangent = 1;
-
+  var label;
   var labels = []; //label array
   var point, totalDepth = 0; //for goto depth
-  var depthValue =[];
-  var depthLabels =[];
+  var depthValue = [];
+  var depthLabels = [];
+  var size = 150;
+  var divisions = 5;
+  var markPoints = size / divisions;
+  var axisPoints = [];
+  var labelPosition = [];
+  var tubularSegments = 150;
+  var radius = 3;
+  var radialSegments = 64;
+  var closed = false;
+  var curveFields = {
+    size: 7,
+    height: 0.1,  
+    curveSegments: 12,
+    weight: "Regular",
+    bevelEnabled: false,
+    bevelThickness: 1,
+    bevelSize: 0.2,
+    bevelSegments: 10,
+    color: "black"
+  }
+  
   init();
 
   function init() {
     trajectorySurface = document.getElementById("trajectory_3d");
     scene = new THREE.Scene();
-    // scene.background = new THREE.Color(0x9c9c9c);
-    //camera
     var aspectRatio = trajectorySurface.offsetWidth / trajectorySurface.offsetHeight;
     var startPosition = new THREE.Vector3(50, 50, 200);
     camera = new THREE.PerspectiveCamera(95, aspectRatio, 1, 10000);
@@ -30,12 +50,6 @@ $(document).ready(function () {
     renderer.setSize(trajectorySurface.offsetWidth, trajectorySurface.offsetHeight);
     renderer.setClearColor(0xffffff, 1);
 
-    //label on y-axis
-    var size = 150;
-    var divisions = 5;
-    var markPoints = size / divisions;
-    var axisPoints = [];
-    var labelPosition = [];
     for (var i = 0; i <= divisions; i++) {
       axisPoints.push(markPoints * i);
       labelPosition.push({
@@ -44,60 +58,12 @@ $(document).ready(function () {
         z: 0
       });
     };
-    var curveFields = {
-      size: 7,
-      height: 0.1,
-      curveSegments: 12,
-      weight: "Regular",
-      bevelEnabled: false,
-      bevelThickness: 1,
-      bevelSize: 0.2,
-      bevelSegments: 10,
-      color: "black"
-    }
-    var loader = new THREE.FontLoader();
-    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
-      _addLabel(font, axisPoints, labelPosition, curveFields);
-    });
 
-    // grid along xz-axis
-    var gridXZ = new THREE.GridHelper(size, divisions);
-    gridXZ.position.set(size / 2, 0, size / 2);
-    scene.add(gridXZ);
+    _labelAxis(axisPoints, labelPosition, curveFields, true, 'labelAxis')
 
-    //grid along xy-axis
-    var gridXY = new THREE.GridHelper(size, divisions);
-    gridXY.rotation.x = Math.PI / 2;
-    gridXY.position.set(size / 2, size / 2, 0);
-    scene.add(gridXY);
+    _gridHlper(size, divisions, true);
 
-    //grid along yz-axis
-    var gridYZ = new THREE.GridHelper(size, divisions);
-    gridYZ.position.set(0, size / 2, size / 2);
-    gridYZ.rotation.z = Math.PI / 2;
-    scene.add(gridYZ);
-
-    var gridZY = new THREE.GridHelper(size, divisions);
-    gridZY.position.set(size , size / 2, size / 2);
-    gridZY.rotation.z = Math.PI / 2;
-    scene.add(gridZY);
-
-    // terrain texture
-    var terrainLoader = new THREE.TerrainLoader();
-    terrainLoader.load('img/jotunheimen.bin', function (data) {
-      var planeGeometry = new THREE.PlaneGeometry(150, 150, 150);
-      for (var i = 0, l = planeGeometry.vertices.length; i < l; i++) {
-        planeGeometry.vertices[i].z = data[i] / 65535 * 5;
-      }
-      var terrainMaterial = new THREE.MeshLambertMaterial({
-        map: new THREE.TextureLoader().load('img/jotunheimen-texture.jpg')
-      });
-      var planeMesh = new THREE.Mesh(planeGeometry, terrainMaterial);
-      planeMesh.rotation.x = Math.PI / 2 + Math.PI;
-      planeMesh.rotation.z = Math.PI / Math.cos(270) * 0.492;
-      planeMesh.position.set(size / 2, 0, size / 2);
-      scene.add(planeMesh);
-    });
+    _textureLoder(size, true);
 
     //Light
     var pointLight = new THREE.PointLight(0xffffff, 1);
@@ -109,10 +75,7 @@ $(document).ready(function () {
     scene.add(spotLight);
 
     //draw trajectory tube
-    var tubularSegments = 150;
-    var radius = 3;
-    var radialSegments = 64;
-    var closed = false;
+
     var trajectoryData = [
       new THREE.Vector3(10, 10, 150),
       new THREE.Vector3(40, 10, 140),
@@ -133,36 +96,9 @@ $(document).ready(function () {
         totalDepth = totalDepth + Math.sqrt((point[i + 1].x - point[i].x) * (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) * (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) * (point[i + 1].z - point[i].z));
       }
     };
-    
-    // label along trajectory curve.
-    var curvePoints = Object.assign([], curve.points);
-    var loader = new THREE.FontLoader();
-      loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
 
-        var curveFields = {
-          size: 4,
-          height: 0.1,
-          curveSegments: 12,
-          weight: "Regular",
-          bevelEnabled: false,
-          bevelThickness: 1,
-          bevelSize: 0.2,
-          bevelSegments: 10,
-          color: "black"
-        }
-        _addLabel(font, depthLabels, depthValue, curveFields);
-    });
-    var material = new THREE.MeshPhysicalMaterial({
-      color: 0xd0d9d9,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.4
-    });
-    var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    well = new THREE.Mesh(geometry, material);
-    scene.add(well);
-    marker = _getCube();
-    scene.add(marker);
+    // label along trajectory curve.
+    _depthLabel(depthLabels, depthValue, curveFields);
     //rotation and zoom controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
@@ -172,6 +108,70 @@ $(document).ready(function () {
     _axisHelper(curveCoordinates);
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
+  }
+  // grid along xz-axis
+  function _gridHlper(size, divisions, visibility) {
+    if (!visibility) {
+      var selectedObject = scene.getObjectByName('gridXY');
+      scene.remove(selectedObject);
+      var selectedObject = scene.getObjectByName('gridYZ');
+      scene.remove(selectedObject);
+      var selectedObject = scene.getObjectByName('gridZY');
+      scene.remove(selectedObject);
+      var selectedObject = scene.getObjectByName('gridXZ');
+      scene.remove(selectedObject);
+    } else {
+      var gridXZ = new THREE.GridHelper(size, divisions);
+      gridXZ.position.set(size / 2, 0, size / 2);
+      gridXZ.name = 'gridXZ';
+      scene.add(gridXZ);
+
+      //grid along xy-axis
+      var gridXY = new THREE.GridHelper(size, divisions);
+      gridXY.rotation.x = Math.PI / 2;
+      gridXY.name = 'gridXY';
+      gridXY.position.set(size / 2, size / 2, 0);
+      scene.add(gridXY);
+
+      //grid along yz-axis
+      var gridYZ = new THREE.GridHelper(size, divisions);
+      gridYZ.position.set(0, size / 2, size / 2);
+      gridYZ.rotation.z = Math.PI / 2;
+      gridYZ.name = 'gridYZ';
+      scene.add(gridYZ);
+
+      var gridZY = new THREE.GridHelper(size, divisions);
+      gridZY.position.set(size, size / 2, size / 2);
+      gridZY.rotation.z = Math.PI / 2;
+      gridZY.name = 'gridZY';
+      scene.add(gridZY);
+    }
+
+  }
+
+  function _textureLoder(size, visible) {
+    if (!visible) {
+      var selectedObject = scene.getObjectByName('planeMesh');
+      scene.remove(selectedObject);
+    } else {
+      var terrainLoader = new THREE.TerrainLoader();
+      terrainLoader.load('img/jotunheimen.bin', function (data) {
+        var planeGeometry = new THREE.PlaneGeometry(150, 150, 150);
+        for (var i = 0, l = planeGeometry.vertices.length; i < l; i++) {
+          planeGeometry.vertices[i].z = data[i] / 65535 * 5;
+        }
+        var terrainMaterial = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load('img/jotunheimen-texture.jpg')
+        });
+        var planeMesh = new THREE.Mesh(planeGeometry, terrainMaterial);
+        planeMesh.rotation.x = Math.PI / 2 + Math.PI;
+        planeMesh.rotation.z = Math.PI / Math.cos(270) * 0.492;
+        planeMesh.position.set(size / 2, 0, size / 2);
+        planeMesh.name = "planeMesh"
+        scene.add(planeMesh);
+
+      });
+    }
   }
 
   function render() {
@@ -192,7 +192,7 @@ $(document).ready(function () {
     }
     pt = curve.getPoint(wellTangent);
     marker.position.set(pt.x, pt.y, pt.z);
-    _animateCameraAlongBit(pt); 
+    _animateCameraAlongBit(pt);
     // get the tangent to the curve
     tangent = curve.getTangent(wellTangent).normalize();
     // calculate the axis to rotate around
@@ -240,33 +240,46 @@ $(document).ready(function () {
   }
 
   function _getCube() {
-    var geometry = new THREE.BoxGeometry( 4, 4, 4 );
-    var material = new THREE.MeshBasicMaterial( {color: 0xfcba03} );
-    var cube = new THREE.Mesh( geometry, material );
+    var geometry = new THREE.BoxGeometry(4, 4, 4);
+    var material = new THREE.MeshBasicMaterial({
+      color: 0xfcba03
+    });
+    var cube = new THREE.Mesh(geometry, material);
     return cube;
   }
 
-  function _addLabel(font, pointsdata, curvePositions, curveFields) {
-    for (var i = 0; i < pointsdata.length; i++) {
-      var textGeo = new THREE.TextGeometry((pointsdata[i]).toString(), {
-        font: font,
-        size: curveFields.size ? curveFields.size : 4,
-        height: curveFields.height ? curveFields.height : 0.1,
-        curveSegments: curveFields.curveSegments ? curveFields.curveSegments : 5,
-        weight: curveFields.weight ? curveFields.weight : "Regular",
-        bevelEnabled: curveFields.bevelEnabled ? curveFields.bevelEnabled : false,
-        bevelThickness: curveFields.bevelThickness ? curveFields.bevelThickness : 1,
-        bevelSize: curveFields.bevelSize ? curveFields.bevelSize : 0.2,
-        bevelSegments: curveFields.bevelSegments ? curveFields.bevelSegments : 10,
-      });
-      var textMaterial = new THREE.MeshPhongMaterial({
-        color: curveFields.color ? curveFields.color : "black"
-      });
-      var label = new THREE.Mesh(textGeo, textMaterial);
-      label.position.set(curvePositions[i].x, curvePositions[i].y, curvePositions[i].z);
-      labels.push(label);
-      scene.add(label);
+  function _addLabel(font, pointsdata, curvePositions, curveFields, visibility, labelName) {
+    if (!visibility) {
+      var selectedObject = scene.getObjectByName('labelAxis');
+      scene.remove(selectedObject);
+    } else {
+      var labelscene = new THREE.Scene();
+      labelscene.name = labelName
+      for (var i = 0; i < pointsdata.length; i++) {
+        var textGeo = new THREE.TextGeometry((pointsdata[i]).toString(), {
+          font: font,
+          size: curveFields.size ? curveFields.size : 4,
+          height: curveFields.height ? curveFields.height : 0.1,
+          curveSegments: curveFields.curveSegments ? curveFields.curveSegments : 5,
+          weight: curveFields.weight ? curveFields.weight : "Regular",
+          bevelEnabled: curveFields.bevelEnabled ? curveFields.bevelEnabled : false,
+          bevelThickness: curveFields.bevelThickness ? curveFields.bevelThickness : 1,
+          bevelSize: curveFields.bevelSize ? curveFields.bevelSize : 0.2,
+          bevelSegments: curveFields.bevelSegments ? curveFields.bevelSegments : 10,
+        });
+        var textMaterial = new THREE.MeshPhongMaterial({
+          color: curveFields.color ? curveFields.color : "black"
+
+        });
+        label = new THREE.Mesh(textGeo, textMaterial);
+        label.position.set(curvePositions[i].x, curvePositions[i].y, curvePositions[i].z);
+        labels.push(label);
+        labelscene.add(label)
+
+      }
+      scene.add(labelscene);
     }
+
   }
 
   function _perpendicularPoints(index, curvePoints) {
@@ -290,7 +303,7 @@ $(document).ready(function () {
   }
 
   function _axisHelper(coordinates) {
-    
+
     var selectedObject = scene.getObjectByName('axisHelper');
     scene.remove(selectedObject);
     var axisHelper = new THREE.AxesHelper(20);
@@ -304,7 +317,7 @@ $(document).ready(function () {
     axisHelper.name = 'axisHelper';
     axisHelper.position.set(coordinates.x, coordinates.y, coordinates.z);
     scene.add(axisHelper);
-    if(previousCoordinates) {
+    if (previousCoordinates) {
       _cameraSetAnimate(new THREE.Vector3(coordinates.x, coordinates.y, coordinates.z));
     } else {
       previousCoordinates = coordinates;
@@ -314,7 +327,7 @@ $(document).ready(function () {
   }
 
   function _cameraSetAnimate(coordinates) {
-    if(previousCoordinates) {
+    if (previousCoordinates) {
       camera.lookAt(new THREE.Vector3(previousCoordinates.x, previousCoordinates.y, previousCoordinates.z));
       startQuaternion = new THREE.Quaternion().copy(camera.quaternion);
     } else {
@@ -346,7 +359,7 @@ $(document).ready(function () {
     }
   });
 
-  function _depthMarker(depth = 0,isClicked){ 
+  function _depthMarker(depth = 0, isClicked) {
     curveDepth = depth;
     if (curveDepth > totalDepth) {
       return;
@@ -354,53 +367,105 @@ $(document).ready(function () {
     var value = 0;
     var previousPoint;
 
-      for (var i = 0; i < point.length; i++) {
-        if (i + 1 < point.length) {
-          value = value + Math.sqrt((point[i + 1].x - point[i].x) *
-            (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
-            (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
-            (point[i + 1].z - point[i].z));
-          if (value >= curveDepth) {
-            depthLabels.push(curveDepth);
-            curveDepth = curveDepth + 40
-            point[i].y = Math.round(point[i].y)
-            previousPoint = point[i];
-            depthValue.push( point[i]);
-           
-            if(isClicked){
-              _axisHelper(previousPoint);
-              break;
-              }
-           
+    for (var i = 0; i < point.length; i++) {
+      if (i + 1 < point.length) {
+        value = value + Math.sqrt((point[i + 1].x - point[i].x) *
+          (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) *
+          (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) *
+          (point[i + 1].z - point[i].z));
+        if (value >= curveDepth) {
+          depthLabels.push(curveDepth);
+          curveDepth = curveDepth + 40
+          point[i].y = Math.round(point[i].y)
+          previousPoint = point[i];
+          depthValue.push(point[i]);
+
+          if (isClicked) {
+            _axisHelper(previousPoint);
+            break;
           }
+
         }
-      };
+      }
+    };
   }
 
   function _animateCameraAlongBit(pt) {
     camera.position.set(pt.x, pt.y, pt.z + 20);
     camera.lookAt(pt.x, pt.y, pt.z + 20);
   }
-  
+
   $("#clickButton").click(function () {
     var curveDepth = Number($("#data").val());
-   if (curveDepth > totalDepth) {
-     return;
-   }
-   _depthMarker(curveDepth,true);
- });
+    if (curveDepth > totalDepth) {
+      return;
+    }
+    _depthMarker(curveDepth, true);
+  });
 
-  $('#btnBitAnimate').click(function(){
+  $('#btnBitAnimate').click(function () {
     wellTangent = 1;
     _wellAnimate();
   });
 
-  trajectorySurface.addEventListener("mousedown", function(e){
-    if(e.button === 2){
-      trajectorySurface.onmousemove = function(e) {          
-        var selectedObject = scene.getObjectByName('axisHelper');
-        scene.remove(selectedObject);
+  trajectorySurface.addEventListener("mousedown", function (e) {
+    if (e.button === 2) {
+      trajectorySurface.onmousemove = function (event) {
+        console.log("event.button")
+        if (e.button === 2) {
+          var selectedObject = scene.getObjectByName('axisHelper');
+          scene.remove(selectedObject);
         }
+        event.preventDefault();
+
+      }
     }
-});
+  });
+
+  function _depthLabel(depthLabels, depthValue, curveFields, labelName) {
+    var curvePoints = Object.assign([], curve.points);
+    var loader = new THREE.FontLoader();
+    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
+      _addLabel(font, depthLabels, depthValue, curveFields, true, );
+    });
+    var material = new THREE.MeshPhysicalMaterial({
+      color: 0xd0d9d9,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.4
+    });
+    var geometry = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
+    well = new THREE.Mesh(geometry, material);
+    scene.add(well);
+    marker = _getCube();
+    scene.add(marker);
+  }
+
+  function _labelAxis(axisPoints, labelPosition, curveFields, visibility, labelName) {
+    loader = new THREE.FontLoader();
+    loader.name = 'loader'
+    loader.load('fonts/droid_sans_regular.typeface.json', function (font) {
+      _addLabel(font, axisPoints, labelPosition, curveFields, visibility, labelName);
+    });
+
+  }
+
+  $('#gridchecked').change(function () {
+    let visibility = true
+    if ($('#gridchecked')[0].checked) {
+      visibility = false;
+    }
+    _labelAxis(axisPoints, labelPosition, curveFields, visibility, 'labelAxis')
+    _gridHlper(150, 5, visibility);
+  });
+
+  $('#textureloder').change(function () {
+    let visible = true
+    if ($('#textureloder')[0].checked) {
+      visible = false
+    }
+    _textureLoder(150, visible);
+
+  });
+
 });
