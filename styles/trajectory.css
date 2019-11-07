@@ -28,3 +28,11 @@
     border-radius: 5px;
     border: 1px solid grey;
 }
+.checkbox{
+    display: block;
+    margin-top: 10px;
+
+}
+.checklabel{
+    margin-right: 10px;
+}
