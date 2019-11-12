@@ -3,7 +3,9 @@
 
 <head>
     <title>Trajectory curve</title>
+    <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="styles/trajectory.css" />
+    <script type="text/javascript" src="scripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
     <script type="text/javascript" src="scripts/three.js"></script>
     <script src="scripts/three.interaction.js"></script>
@@ -12,17 +14,44 @@
     <script type="text/javascript" src="scripts/threeTerrain.js"></script>
 </head>
 <body> 
-    <div class="toolBox">
-        <input type="text" class="textfield" placeholder="Enter the depth" id="data">
-        <button class="button" id="clickButton">Go to </button>
-        <button class="button" id="btnBitAnimate">Animate bit</button>
-        <div class="checkbox">
-            <input type="checkbox" id="chkgrid"><span class="checklabel">Hide grid</span>
-            <input type="checkbox" id="chktextureloader"><span class="checklabel">Hide texture</span>
+    <div class="container-fluid">
+        <div class='toolBox'>
+            <div class="row">
+                <div class="col-2">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control btn-sm" id="data" placeholder="Enter the depth">
+                        <div class="input-group-append">
+                            <button type="submit" id="clickButton" class="btn btn-primary btn-sm">Go to</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="chkgrid">
+                        <label class="form-check-label" for="chkgrid">Hide grid</label>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="chktextureloader">
+                        <label class="form-check-label" for="chktextureloader">Hide texture</label>
+                    </div>
+                </div>
+                <div class="col-2">
+                    Controls
+                </div>
+                <div class="col-2">
+                        Controls
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary btn-sm" id="btnBitAnimate">Animate bit</button>
+                </div>
+            </div>
+     
+            
         </div>
-    </div>
-    
-    <canvas id="trajectory_3d"></canvas>
-</body>
 
+        <canvas id="trajectory_3d"></canvas>
+    </div>
+</body>
 </html>
