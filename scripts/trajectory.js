@@ -29,7 +29,9 @@ $(document).ready(function () {
     bevelSegments: 10,
     color: "black"
   }
-  var isPanned = false;
+   var isMouceClicked = false;
+   var mouseButton;
+   var isPanned = false;
 
   init();
 
@@ -97,9 +99,7 @@ $(document).ready(function () {
         totalDepth = totalDepth + Math.sqrt((point[i + 1].x - point[i].x) * (point[i + 1].x - point[i].x) + (point[i + 1].y - point[i].y) * (point[i + 1].y - point[i].y) + (point[i + 1].z - point[i].z) * (point[i + 1].z - point[i].z));
       }
     };
-
     _depthLabel(depthLabels, depthValue, curveFields, false, 'labelDepth');
-
     // label along trajectory curve.
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target = new THREE.Vector3(curveCoordinates.x, curveCoordinates.y, curveCoordinates.z);
@@ -109,8 +109,8 @@ $(document).ready(function () {
     _axisHelper(curveCoordinates);
     render();
     var interaction = new THREE.Interaction(renderer, scene, camera);
-  }
 
+  }
   function _gridHelper(gridSize, gridDivisions, isHidden) {
     if (isHidden) {
       var selectedObject = scene.getObjectByName('gridXY');
@@ -417,8 +417,58 @@ $(document).ready(function () {
     wellTangent = 1;
     _wellAnimate();
   });
+   //hide gird//
+  trajectorySurface.addEventListener("mousedown", function (e) {
+    isMouceClicked = true;
+    mouseButton = e.button;
+  });
+  trajectorySurface.addEventListener("mouseup", function (e) {
+    isMouceClicked = false;
+    mouseButton = null;
+  });
+  trajectorySurface.addEventListener("mousemove", function (e) {
+    if (isMouceClicked) {
+      if (mouseButton === 2) {
+        var selectedObject = scene.getObjectByName('axisHelper');
+        scene.remove(selectedObject);
+      } else if (mouseButton == 0) {
+        if (controls.object.position.x < 0) {
+          var selectedObject = scene.getObjectByName('gridYZ');
+          scene.remove(selectedObject);
 
-  trajectorySurface.onmousemove = function (e) {
+          var gridYX = new THREE.GridHelper(gridSize, gridDivisions);
+          gridYX.rotation.x = Math.PI / 2;
+          gridYX.name = 'gridYX';
+          gridYX.position.set(gridSize / 2, gridSize / 2, gridSize);
+          scene.add(gridYX);
+
+        } else if(controls.object.position.x > 0) {
+          var selectedObject = scene.getObjectByName('gridYX');
+          scene.remove(selectedObject);
+          var gridYZ = new THREE.GridHelper(gridSize, gridDivisions);
+          gridYZ.position.set(0, gridSize / 2, gridSize / 2);
+          gridYZ.rotation.z = Math.PI / 2;
+          gridYZ.name = 'gridYZ';
+          scene.add(gridYZ);
+          
+
+        }else{
+          var gridYZ = new THREE.GridHelper(gridSize, gridDivisions);
+          gridYZ.position.set(0, gridSize / 2, gridSize / 2);
+          gridYZ.rotation.z = Math.PI / 2;
+          gridYZ.name = 'gridYZ';
+          scene.add(gridYZ);
+
+
+          var gridZY = new THREE.GridHelper(gridSize, gridDivisions);
+          gridZY.position.set(gridSize, gridSize / 2, gridSize / 2);
+          gridZY.rotation.z = Math.PI / 2;
+          gridZY.name = 'gridZY';
+          scene.add(gridZY);
+        }
+
+      }
+       trajectorySurface.onmousemove = function (e) {
     if (isPanned) {
       var selectedObject = scene.getObjectByName('axisHelper');
       scene.remove(selectedObject);
