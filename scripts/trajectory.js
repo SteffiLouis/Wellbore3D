@@ -29,8 +29,10 @@ $(document).ready(function () {
     bevelSegments: 10,
     color: "black"
   }
-  var isMouceClicked = false;
-  var mouseButton;
+   var isMouceClicked = false;
+   var mouseButton;
+   var isPanned = false;
+
   init();
 
   function init() {
@@ -392,10 +394,9 @@ $(document).ready(function () {
             _axisHelper(previousPoint);
             break;
           }
-
         }
       }
-    };
+    }
   }
 
   function _animateCameraAlongBit(pt) {
@@ -416,7 +417,7 @@ $(document).ready(function () {
     wellTangent = 1;
     _wellAnimate();
   });
-  //hide gird//
+   //hide gird//
   trajectorySurface.addEventListener("mousedown", function (e) {
     isMouceClicked = true;
     mouseButton = e.button;
@@ -467,6 +468,17 @@ $(document).ready(function () {
         }
 
       }
+       trajectorySurface.onmousemove = function (e) {
+    if (isPanned) {
+      var selectedObject = scene.getObjectByName('axisHelper');
+      scene.remove(selectedObject);
+    }
+  }
+
+  trajectorySurface.addEventListener("mousedown", function (e) {
+    isPanned = false;
+    if (e.button === 2) {
+      isPanned = true;
     }
   });
 
